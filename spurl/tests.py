@@ -13,3 +13,7 @@ def test_passthrough():
     template = """{% spurl "http://www.google.com" %}"""
     assert render(template) == 'http://www.google.com'
 
+def test_url_in_variable():
+    template = """{% spurl myurl %}"""
+    data = {'myurl': 'http://www.google.com'}
+    assert render(template, data) == 'http://www.google.com'
