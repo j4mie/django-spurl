@@ -15,6 +15,14 @@ def render(template_string, dictionary=None):
 def test_noargs_raises_exception():
     render("""{% spurl %}""")
 
+@nose.tools.raises(TemplateSyntaxError)
+def test_malformed_args_raises_exception():
+    render("""{% spurl something %}""")
+
+@nose.tools.raises(TemplateSyntaxError)
+def test_missing_quotes_raises_exception():
+    render("""{% spurl base="http://www.google.com" secure=True %}""")
+
 def test_passthrough():
     template = """{% spurl base="http://www.google.com" %}"""
     rendered = render(template)

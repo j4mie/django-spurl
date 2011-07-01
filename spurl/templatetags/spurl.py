@@ -11,8 +11,22 @@ class SpurlNode(Node):
 
     def render(self, context):
 
-        kwargs = dict([(smart_str(k, 'ascii'), v.resolve(context))
-                       for k, v in self.kwargs.items()])
+        kwargs = {}
+        for key, value in self.kwargs.items():
+            key = smart_str(key, 'ascii')
+            value = value.resolve(context)
+
+            # If value is empty here, the user probably did something wrong.
+            # Django convention is to stay silent, but I think it's probably
+            # going to be more helpful to shout loudly here. Maybe this should
+            # only happen if we're in DEBUG mode?
+            if value == '':
+                raise TemplateSyntaxError("'spurl' failed to find a value for the "
+                                          "key '%s'. If you are passing a literal "
+                                          "string to 'spurl', remember to surround "
+                                          "it with quotes." % key)
+
+            kwargs[key] = value
 
         if 'base' in kwargs:
             url = URLObject.parse(kwargs['base'])
