@@ -93,3 +93,8 @@ def test_override_scheme():
     template = """{% spurl base="http://google.com" scheme="ftp" %}"""
     rendered = render(template)
     assert rendered == 'ftp://google.com'
+
+def test_override_host():
+    template = """{% spurl base="http://www.google.com/some/path/" host="www.example.com" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.example.com/some/path/'

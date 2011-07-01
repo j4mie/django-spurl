@@ -58,6 +58,9 @@ class SpurlNode(Node):
         if 'scheme' in kwargs:
             url = url.with_scheme(kwargs['scheme'])
 
+        if 'host' in kwargs:
+            url = url.with_host(kwargs['host'])
+
         return unicode(url)
 
 @register.tag
