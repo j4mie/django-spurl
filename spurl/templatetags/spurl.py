@@ -45,6 +45,9 @@ class SpurlNode(Node):
             else:
                 url = url.with_scheme('http')
 
+        if 'query' in kwargs:
+            url = url.with_query(kwargs['query'])
+
         return unicode(url)
 
 @register.tag

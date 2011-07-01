@@ -55,3 +55,25 @@ def test_make_insecure_with_variable():
     data = {'myurl': 'https://www.google.com', 'is_secure': False}
     rendered = render(template, data)
     assert rendered == 'http://www.google.com'
+
+def test_set_query_from_string():
+    template = """{% spurl base="http://www.google.com" query="foo=bar&bar=foo" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com?foo=bar&bar=foo'
+
+def test_set_query_from_string_with_variable():
+    template = """{% spurl base=myurl query=myquery %}"""
+    data = {'myurl': 'http://www.google.com', 'myquery': 'foo=bar&bar=foo'}
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com?foo=bar&bar=foo'
+
+def test_set_query_from_dict_with_variable():
+    template = """{% spurl base=myurl query=myquery %}"""
+    data = {'myurl': 'http://www.google.com', 'myquery': {'foo': 'bar', 'bar': 'foo'}}
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com?foo=bar&bar=foo'
+
+def test_set_query_removes_existing_query():
+    template = """{% spurl base="http://www.google.com?something=somethingelse" query="foo=bar&bar=foo" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com?foo=bar&bar=foo'
