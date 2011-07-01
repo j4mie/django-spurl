@@ -31,7 +31,7 @@ class SpurlNode(Node):
         if 'base' in kwargs:
             url = URLObject.parse(kwargs['base'])
         else:
-            url = URLObject()
+            url = URLObject(scheme='http')
 
         if 'secure' in kwargs:
             secure = kwargs['secure']
@@ -69,6 +69,10 @@ class SpurlNode(Node):
 
         if 'port' in kwargs:
             url = url.with_port(kwargs['port'])
+
+        # sensible default
+        if not url.host:
+            url = url.with_scheme('')
 
         return unicode(url)
 

@@ -118,3 +118,12 @@ def test_build_complete_url():
     template = """{% spurl scheme="http" host="www.google.com" path="/some/path/" port="8080" fragment="somefragment" %}"""
     rendered = render(template)
     assert rendered == 'http://www.google.com:8080/some/path/#somefragment'
+
+def test_sensible_defaults():
+    template = """{% spurl path="/some/path/" %}"""
+    rendered = render(template)
+    assert rendered == '/some/path/'
+
+    template = """{% spurl path="/some/path/" host="www.google.com" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com/some/path/'
