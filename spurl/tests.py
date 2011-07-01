@@ -77,3 +77,14 @@ def test_set_query_removes_existing_query():
     template = """{% spurl base="http://www.google.com?something=somethingelse" query="foo=bar&bar=foo" %}"""
     rendered = render(template)
     assert rendered == 'http://www.google.com?foo=bar&bar=foo'
+
+def test_add_to_query_from_string():
+    template = """{% spurl base="http://www.google.com?something=somethingelse" add_query="foo=bar&bar=foo" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com?something=somethingelse&foo=bar&bar=foo'
+
+def test_add_to_query_from_dict_with_variable():
+    template = """{% spurl base=myurl add_query=myquery %}"""
+    data = {'myurl': 'http://www.google.com?something=somethingelse', 'myquery': {'foo': 'bar', 'bar': 'foo'}}
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com?something=somethingelse&foo=bar&bar=foo'

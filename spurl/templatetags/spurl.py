@@ -1,7 +1,7 @@
 from django.template import Library, Node, TemplateSyntaxError
 from django.template.defaulttags import kwarg_re
 from django.utils.encoding import smart_str
-from urlobject import URLObject
+from urlobject import URLObject, decode_query
 
 register = Library()
 
@@ -47,6 +47,13 @@ class SpurlNode(Node):
 
         if 'query' in kwargs:
             url = url.with_query(kwargs['query'])
+
+        if 'add_query' in kwargs:
+            query_to_add = kwargs['add_query']
+            if isinstance(query_to_add, basestring):
+                query_to_add = dict(decode_query(query_to_add))
+            for key, value in query_to_add.items():
+                url = url.add_query_param(key, value)
 
         return unicode(url)
 
