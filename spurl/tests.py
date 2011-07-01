@@ -113,3 +113,8 @@ def test_override_port():
     template = """{% spurl base="http://www.google.com:80" port="8080" %}"""
     rendered = render(template)
     assert rendered == 'http://www.google.com:8080'
+
+def test_build_complete_url():
+    template = """{% spurl scheme="http" host="www.google.com" path="/some/path/" port="8080" fragment="somefragment" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com:8080/some/path/#somefragment'
