@@ -103,3 +103,8 @@ def test_override_path():
     template = """{% spurl base="http://www.google.com/some/path/" path="/another/different/one/" %}"""
     rendered = render(template)
     assert rendered == 'http://www.google.com/another/different/one/'
+
+def test_override_fragment():
+    template = """{% spurl base="http://www.google.com/#somefragment" fragment="someotherfragment" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com/#someotherfragment'
