@@ -1,6 +1,7 @@
 from django.template import Library, Node, TemplateSyntaxError
 from django.template.defaulttags import kwarg_re
 from django.utils.encoding import smart_str
+from urlobject import URLObject
 
 register = Library()
 
@@ -13,7 +14,24 @@ class SpurlNode(Node):
         kwargs = dict([(smart_str(k, 'ascii'), v.resolve(context))
                        for k, v in self.kwargs.items()])
 
-        return kwargs['base']
+        if 'base' in kwargs:
+            url = URLObject.parse(kwargs['base'])
+        else:
+            url = URLObject()
+
+        if 'secure' in kwargs:
+            secure = kwargs['secure']
+            if isinstance(secure, basestring):
+                if secure.lower() == 'true':
+                    secure = True
+                else:
+                    secure = False
+            if secure:
+                url = url.with_scheme('https')
+            else:
+                url = url.with_scheme('http')
+
+        return unicode(url)
 
 @register.tag
 def spurl(parser, token):

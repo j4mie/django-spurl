@@ -25,3 +25,25 @@ def test_url_in_variable():
     data = {'myurl': 'http://www.google.com'}
     rendered = render(template, data)
     assert rendered == 'http://www.google.com'
+
+def test_make_secure():
+    template = """{% spurl base="http://www.google.com" secure="True" %}"""
+    rendered = render(template)
+    assert rendered == 'https://www.google.com'
+
+def test_make_secure_with_variable():
+    template = """{% spurl base=myurl secure=is_secure %}"""
+    data = {'myurl': 'http://www.google.com', 'is_secure': True}
+    rendered = render(template, data)
+    assert rendered == 'https://www.google.com'
+
+def test_make_insecure():
+    template = """{% spurl base="https://www.google.com" secure="False" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com'
+
+def test_make_insecure_with_variable():
+    template = """{% spurl base=myurl secure=is_secure %}"""
+    data = {'myurl': 'https://www.google.com', 'is_secure': False}
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com'
