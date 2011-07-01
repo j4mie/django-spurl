@@ -98,3 +98,8 @@ def test_override_host():
     template = """{% spurl base="http://www.google.com/some/path/" host="www.example.com" %}"""
     rendered = render(template)
     assert rendered == 'http://www.example.com/some/path/'
+
+def test_override_path():
+    template = """{% spurl base="http://www.google.com/some/path/" path="/another/different/one/" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com/another/different/one/'
