@@ -67,6 +67,9 @@ class SpurlNode(Node):
         if 'fragment' in kwargs:
             url = url.with_fragment(kwargs['fragment'])
 
+        if 'port' in kwargs:
+            url = url.with_port(kwargs['port'])
+
         return unicode(url)
 
 @register.tag

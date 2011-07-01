@@ -108,3 +108,8 @@ def test_override_fragment():
     template = """{% spurl base="http://www.google.com/#somefragment" fragment="someotherfragment" %}"""
     rendered = render(template)
     assert rendered == 'http://www.google.com/#someotherfragment'
+
+def test_override_port():
+    template = """{% spurl base="http://www.google.com:80" port="8080" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com:8080'
