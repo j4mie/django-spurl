@@ -55,6 +55,9 @@ class SpurlNode(Node):
             for key, value in query_to_add.items():
                 url = url.add_query_param(key, value)
 
+        if 'scheme' in kwargs:
+            url = url.with_scheme(kwargs['scheme'])
+
         return unicode(url)
 
 @register.tag

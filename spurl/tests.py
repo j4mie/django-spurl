@@ -88,3 +88,8 @@ def test_add_to_query_from_dict_with_variable():
     data = {'myurl': 'http://www.google.com?something=somethingelse', 'myquery': {'foo': 'bar', 'bar': 'foo'}}
     rendered = render(template, data)
     assert rendered == 'http://www.google.com?something=somethingelse&foo=bar&bar=foo'
+
+def test_override_scheme():
+    template = """{% spurl base="http://google.com" scheme="ftp" %}"""
+    rendered = render(template)
+    assert rendered == 'ftp://google.com'
