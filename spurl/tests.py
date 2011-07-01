@@ -1,19 +1,27 @@
-# bootstrap django
 from django.conf import settings
-settings.configure()#INSTALLED_APPS=('spurl',))
+from django.template import Template, Context, loader, TemplateSyntaxError
+import nose
 
-from django.template import Template, Context, loader
+# bootstrap django
+settings.configure()
 
+# add spurl to builtin tags
 loader.add_to_builtins('spurl.templatetags.spurl')
 
 def render(template_string, dictionary=None):
     return Template(template_string).render(Context(dictionary))
 
+@nose.tools.raises(TemplateSyntaxError)
+def test_noargs_raises_exception():
+    render("""{% spurl %}""")
+
 def test_passthrough():
-    template = """{% spurl "http://www.google.com" %}"""
-    assert render(template) == 'http://www.google.com'
+    template = """{% spurl base="http://www.google.com" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com'
 
 def test_url_in_variable():
-    template = """{% spurl myurl %}"""
+    template = """{% spurl base=myurl %}"""
     data = {'myurl': 'http://www.google.com'}
-    assert render(template, data) == 'http://www.google.com'
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com'
