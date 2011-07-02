@@ -70,7 +70,7 @@ The problem here is that you don't know in advance if the URLs stored in your da
 Spurl can fix this. Because it knows about the components of a URL, it can add parameters onto an existing query, if there is one.
 
     {% for url, title in list_of_links %}
-        <a href="{% spurl base=url add_query="referrer=mysite.com" %}>{{ title }}</a>
+        <a href="{% spurl base=url add_query="referrer=mysite.com" %}">{{ title }}</a>
     {% endfor %}
 
 Note that **when you pass a literal string to Spurl, you have to wrap it in double quotes**. If you don't, Spurl will assume it's a variable name and try to look it up in the template's context.
