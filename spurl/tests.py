@@ -73,6 +73,12 @@ def test_set_query_from_dict_with_variable():
     rendered = render(template, data)
     assert rendered == 'http://www.google.com?foo=bar&bar=foo'
 
+def test_set_query_from_template_variables():
+    template = """{% spurl base=myurl query="foo={{ first_var }}&bar={{ second_var }}" %}"""
+    data = {'myurl': 'http://www.google.com', 'first_var': 'bar', 'second_var': 'baz'}
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com?foo=bar&bar=baz'
+
 def test_set_query_removes_existing_query():
     template = """{% spurl base="http://www.google.com?something=somethingelse" query="foo=bar&bar=foo" %}"""
     rendered = render(template)
@@ -92,6 +98,12 @@ def test_add_to_query_from_dict_with_variable():
 def test_multiple_add_query():
     template = """{% spurl base="http://www.google.com/" add_query="foo=bar" add_query="bar=baz" %}"""
     rendered = render(template)
+    assert rendered == 'http://www.google.com/?foo=bar&bar=baz'
+
+def test_add_to_query_from_template_variables():
+    template = """{% spurl base="http://www.google.com/?foo=bar" add_query="bar={{ var }}" %}"""
+    data = {'var': 'baz'}
+    rendered = render(template, data)
     assert rendered == 'http://www.google.com/?foo=bar&bar=baz'
 
 def test_override_scheme():

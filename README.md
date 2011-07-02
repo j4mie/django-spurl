@@ -137,6 +137,10 @@ The `query` argument can also be passed a dictionary from your template's contex
 
 This will return `http://example.com/?foo=bar&bar=baz`
 
+Finally, you can pass individual template variables to the query. To do this, Spurl uses Django's template system. For example:
+
+    {% spurl base="http://example.com/" query="foo={{ variable_name }}" %}
+
 #### `add_query`
 
 Append a set of parameters to an existing query. If your base URL might already have a query component, this will merge the existing parameters with your new ones. Example:
@@ -151,6 +155,7 @@ You can add multiple `add_query` calls, and the results of each will be combined
 
 This will return `http://example.com?foo=bar&bar=baz`
 
+Like the `query` argument above, the values passed to `add_query` can also be dictionaries, and they can contain Django template variables.
 
 #### `secure`
 

@@ -1,4 +1,4 @@
-from django.template import Library, Node, TemplateSyntaxError
+from django.template import Template, Library, Node, TemplateSyntaxError
 from django.template.defaulttags import kwarg_re
 from django.utils.encoding import smart_str
 from django.utils.datastructures import MultiValueDict
@@ -48,11 +48,15 @@ class SpurlNode(Node):
                 url = url.with_scheme('http')
 
         if 'query' in kwargs:
-            url = url.with_query(kwargs['query'])
+            query = kwargs['query']
+            if isinstance(query, basestring):
+                query = Template(query).render(context)
+            url = url.with_query(query)
 
         if 'add_query' in kwargs:
             for query_to_add in kwargs.getlist('add_query'):
                 if isinstance(query_to_add, basestring):
+                    query_to_add = Template(query_to_add).render(context)
                     query_to_add = dict(decode_query(query_to_add))
                 for key, value in query_to_add.items():
                     url = url.add_query_param(key, value)
