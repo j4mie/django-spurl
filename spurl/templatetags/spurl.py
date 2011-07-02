@@ -1,6 +1,7 @@
 from django.template import Library, Node, TemplateSyntaxError
 from django.template.defaulttags import kwarg_re
 from django.utils.encoding import smart_str
+from django.utils.datastructures import MultiValueDict
 from urlobject import URLObject, decode_query
 
 register = Library()
@@ -11,22 +12,23 @@ class SpurlNode(Node):
 
     def render(self, context):
 
-        kwargs = {}
-        for key, value in self.kwargs.items():
+        kwargs = MultiValueDict()
+        for key in self.kwargs:
             key = smart_str(key, 'ascii')
-            value = value.resolve(context)
+            values = [value.resolve(context) for value in self.kwargs.getlist(key)]
 
             # If value is empty here, the user probably did something wrong.
             # Django convention is to stay silent, but I think it's probably
             # going to be more helpful to shout loudly here. Maybe this should
             # only happen if we're in DEBUG mode?
-            if value == '':
-                raise TemplateSyntaxError("'spurl' failed to find a value for the "
-                                          "key '%s'. If you are passing a literal "
-                                          "string to 'spurl', remember to surround "
-                                          "it with quotes." % key)
+            for value in values:
+                if value == '':
+                    raise TemplateSyntaxError("'spurl' failed to find a value for the "
+                                              "key '%s'. If you are passing a literal "
+                                              "string to 'spurl', remember to surround "
+                                              "it with quotes." % key)
 
-            kwargs[key] = value
+            kwargs.setlist(key, values)
 
         if 'base' in kwargs:
             url = URLObject.parse(kwargs['base'])
@@ -49,11 +51,11 @@ class SpurlNode(Node):
             url = url.with_query(kwargs['query'])
 
         if 'add_query' in kwargs:
-            query_to_add = kwargs['add_query']
-            if isinstance(query_to_add, basestring):
-                query_to_add = dict(decode_query(query_to_add))
-            for key, value in query_to_add.items():
-                url = url.add_query_param(key, value)
+            for query_to_add in kwargs.getlist('add_query'):
+                if isinstance(query_to_add, basestring):
+                    query_to_add = dict(decode_query(query_to_add))
+                for key, value in query_to_add.items():
+                    url = url.add_query_param(key, value)
 
         if 'scheme' in kwargs:
             url = url.with_scheme(kwargs['scheme'])
@@ -82,12 +84,12 @@ def spurl(parser, token):
     if len(bits) < 2:
         raise TemplateSyntaxError("'spurl' takes at least one argument")
 
-    kwargs = {}
+    kwargs = MultiValueDict()
     bits = bits[1:]
 
     for bit in bits:
         name, value = kwarg_re.match(bit).groups()
         if not (name and value):
             raise TemplateSyntaxError("Malformed arguments to spurl tag")
-        kwargs[name] = parser.compile_filter(value)
+        kwargs.appendlist(name, parser.compile_filter(value))
     return SpurlNode(kwargs)

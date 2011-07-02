@@ -145,6 +145,13 @@ Append a set of parameters to an existing query. If your base URL might already 
 
 This will return `http://example.com?foo=bar&bar=baz`
 
+You can add multiple `add_query` calls, and the results of each will be combined:
+
+    {% spurl base="http://example.com/" add_query="foo=bar" add_query="bar=baz" %}
+
+This will return `http://example.com?foo=bar&bar=baz`
+
+
 #### `secure`
 
 Control whether the generated URL starts with `http` or `https`. The value of this argument can be a boolean (`True` or `False`), if you're using a context variable. If you're using a literal argument here, it must be a quoted string. The string `"True"` (case-insensitive) will be converted to `True`, any other string will be converted to `False`. Example:

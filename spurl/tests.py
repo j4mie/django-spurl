@@ -89,6 +89,11 @@ def test_add_to_query_from_dict_with_variable():
     rendered = render(template, data)
     assert rendered == 'http://www.google.com?something=somethingelse&foo=bar&bar=foo'
 
+def test_multiple_add_query():
+    template = """{% spurl base="http://www.google.com/" add_query="foo=bar" add_query="bar=baz" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com/?foo=bar&bar=baz'
+
 def test_override_scheme():
     template = """{% spurl base="http://google.com" scheme="ftp" %}"""
     rendered = render(template)
