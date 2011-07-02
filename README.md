@@ -1,6 +1,29 @@
 # Spurl
 
-`Spurl` is a Django template library for manipulating URLs. It's built on top of Zachary Voase's excellent [urlobject](https://github.com/zacharyvoase/urlobject/).
+**Super URLs for Django**
+
+               .=.,
+              ;c =\
+            __|  _/
+          .'-'-._/-'-._
+         /..   ____    \
+        /  {% spurl %}  \
+       (  / \--\_>/-/'._ )
+        \-;_/\__;__/ _/ _/
+         '._}|==o==\{_\/
+          /  /-._.--\  \_
+         // /   /|   \ \ \
+        / | |   | \;  |  \ \
+       / /  | :/   \: \   \_\
+      /  |  /.'|   /: |    \ \
+      |  |  |--| . |--|     \_\
+      / _/   \ | : | /___--._) \
+     |_(---'-| >-'-| |       '-'
+            /_/     \_\
+
+
+
+**Spurl** is a Django template library for manipulating URLs. It's built on top of Zachary Voase's excellent [urlobject](https://github.com/zacharyvoase/urlobject/).
 
 **Spurl is currently in alpha and is probably not ready for production use**.
 
@@ -73,11 +96,11 @@ Notice that Spurl's functionality doesn't overlap with Django's built-in `{% url
 
 Below is a full list of arguments that Spurl understands.
 
-#### `base`
+#### base
 
 If you pass a `base` argument to Spurl, it will parse its contents and use this as the base URL upon which all other arguments will operate. If you *don't* pass a `base` argument, Spurl will generate a URL from scratch based on the components that you pass in separately.
 
-#### `scheme`
+#### scheme
 
 Set the scheme component of the URL. Example:
 
@@ -85,7 +108,7 @@ Set the scheme component of the URL. Example:
 
 This will return `ftp://example.com`
 
-#### `host`
+#### host
 
 Set the host component of the URL. Example:
 
@@ -93,7 +116,7 @@ Set the host component of the URL. Example:
 
 This will return `http://google.com/some/path/`
 
-#### `path`
+#### path
 
 Set the path component of the URL. Example:
 
@@ -101,7 +124,7 @@ Set the path component of the URL. Example:
 
 This will return `http://example.com/different/`
 
-#### `fragment`
+#### fragment
 
 Set the fragment component of the URL. Example:
 
@@ -109,7 +132,7 @@ Set the fragment component of the URL. Example:
 
 This will return `http://example.com/#myfragment`
 
-#### `port`
+#### port
 
 Set the port component of the URL. Example:
 
@@ -117,7 +140,7 @@ Set the port component of the URL. Example:
 
 This will return `http://example.com:8080/some/path/`
 
-#### `query`
+#### query
 
 Set the query component of the URL. Example:
 
@@ -141,7 +164,7 @@ Finally, you can pass individual template variables to the query. To do this, Sp
 
     {% spurl base="http://example.com/" query="foo={{ variable_name }}" %}
 
-#### `add_query`
+#### add_query
 
 Append a set of parameters to an existing query. If your base URL might already have a query component, this will merge the existing parameters with your new ones. Example:
 
@@ -157,7 +180,7 @@ This will return `http://example.com?foo=bar&bar=baz`
 
 Like the `query` argument above, the values passed to `add_query` can also be dictionaries, and they can contain Django template variables.
 
-#### `secure`
+#### secure
 
 Control whether the generated URL starts with `http` or `https`. The value of this argument can be a boolean (`True` or `False`), if you're using a context variable. If you're using a literal argument here, it must be a quoted string. The string `"True"` (case-insensitive) will be converted to `True`, any other string will be converted to `False`. Example:
 
@@ -188,3 +211,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 For more information, please refer to <http://unlicense.org/>
+
+## Artwork credit
+
+Superman ASCII art comes from <http://ascii.co.uk/art/superman>
