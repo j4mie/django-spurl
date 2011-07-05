@@ -70,6 +70,10 @@ class SpurlNode(Node):
         if 'path' in kwargs:
             url = url.with_path(kwargs['path'])
 
+        if 'add_path' in kwargs:
+            for path_to_add in kwargs.getlist('add_path'):
+                url = url.add_path_component(path_to_add)
+
         if 'fragment' in kwargs:
             url = url.with_fragment(kwargs['fragment'])
 

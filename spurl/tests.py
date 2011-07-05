@@ -121,6 +121,23 @@ def test_override_path():
     rendered = render(template)
     assert rendered == 'http://www.google.com/another/different/one/'
 
+def test_add_path():
+    template = """{% spurl base="http://www.google.com/some/path/" add_path="another/" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com/some/path/another/'
+
+def test_multiple_add_path():
+    template = """{% spurl base="http://www.google.com/" add_path="some" add_path="another/" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com/some/another/'
+
+def test_multiple_add_path_from_template_variables():
+    """Usage example for building media urls"""
+    template = """{% spurl base=STATIC_URL add_path="javascript" add_path="lib" add_path="jquery.js" %}"""
+    data = {'STATIC_URL': 'http://cdn.example.com'}
+    rendered = render(template, data)
+    assert rendered == 'http://cdn.example.com/javascript/lib/jquery.js'
+
 def test_override_fragment():
     template = """{% spurl base="http://www.google.com/#somefragment" fragment="someotherfragment" %}"""
     rendered = render(template)

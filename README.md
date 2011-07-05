@@ -124,6 +124,14 @@ Set the path component of the URL. Example:
 
 This will return `http://example.com/different/`
 
+#### add_path
+
+Append a path component to the existing path. You can add multiple `add_path` calls, and the results of each will be combined. Example:
+
+    {% spurl base=STATIC_URL add_path="javascript" add_path="lib" add_path="jquery.js" %}
+
+This will return `http://cdn.example.com/javascript/lib/jquery.js` (assuming `STATIC_URL` is set to `http://cdn.example.com`)
+
 #### fragment
 
 Set the fragment component of the URL. Example:
