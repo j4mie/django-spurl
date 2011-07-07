@@ -79,6 +79,12 @@ def test_set_query_from_template_variables():
     rendered = render(template, data)
     assert rendered == 'http://www.google.com?foo=bar&bar=baz'
 
+def test_template_variables_are_not_double_escaped():
+    template = """{% spurl base="http://www.google.com" query="{{ query }}" %}"""
+    data = {'query': 'foo=bar&bar=foo'}
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com?foo=bar&bar=foo'
+
 def test_set_query_removes_existing_query():
     template = """{% spurl base="http://www.google.com?something=somethingelse" query="foo=bar&bar=foo" %}"""
     rendered = render(template)

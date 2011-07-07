@@ -6,6 +6,12 @@ from urlobject import URLObject, decode_query
 
 register = Library()
 
+def render_template_from_string_without_autoescape(template_string, context):
+    context_copy = context.__copy__()
+    context_copy.autoescape = False
+    return Template(template_string).render(context_copy)
+
+
 class SpurlNode(Node):
     def __init__(self, kwargs):
         self.kwargs = kwargs
@@ -50,13 +56,13 @@ class SpurlNode(Node):
         if 'query' in kwargs:
             query = kwargs['query']
             if isinstance(query, basestring):
-                query = Template(query).render(context)
+                query = render_template_from_string_without_autoescape(query, context)
             url = url.with_query(query)
 
         if 'add_query' in kwargs:
             for query_to_add in kwargs.getlist('add_query'):
                 if isinstance(query_to_add, basestring):
-                    query_to_add = Template(query_to_add).render(context)
+                    query_to_add = render_template_from_string_without_autoescape(query_to_add, context)
                     query_to_add = dict(decode_query(query_to_add))
                 for key, value in query_to_add.items():
                     url = url.add_query_param(key, value)
