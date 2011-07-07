@@ -196,6 +196,10 @@ Control whether the generated URL starts with `http` or `https`. The value of th
 
 This will return `https://example.com/`
 
+#### autoescape
+
+By default, Spurl will escape its output in the same way as Django's template system. For example, an `&` character in a URL will be rendered as `&amp;`. You can override this behaviour by passing an `autoescape` argument, which must be either a boolean (if passed from a template variable) or a string (`"True"` or `"False"`).
+
 ## (Un)license
 
 This is free and unencumbered software released into the public domain.

@@ -2,6 +2,7 @@ from django.template import Template, Library, Node, TemplateSyntaxError
 from django.template.defaulttags import kwarg_re
 from django.utils.encoding import smart_str
 from django.utils.datastructures import MultiValueDict
+from django.utils.html import escape
 from urlobject import URLObject, decode_query
 
 register = Library()
@@ -90,7 +91,23 @@ class SpurlNode(Node):
         if not url.host:
             url = url.with_scheme('')
 
-        return unicode(url)
+        # Convert the URLObject to its unicode representation
+        url = unicode(url)
+
+        # Handle escaping. By default, use the value of
+        # context.autoescape. This can be overridden by
+        # passing and "autoescape" keyword to the tag.
+        if 'autoescape' in kwargs:
+            autoescape = kwargs['autoescape']
+            if isinstance(autoescape, basestring):
+                autoescape = autoescape.lower() == 'true'
+        else:
+            autoescape = context.autoescape
+
+        if autoescape:
+            url = escape(url)
+
+        return url
 
 @register.tag
 def spurl(parser, token):

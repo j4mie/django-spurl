@@ -8,8 +8,17 @@ settings.configure()
 # add spurl to builtin tags
 loader.add_to_builtins('spurl.templatetags.spurl')
 
-def render(template_string, dictionary=None):
-    return Template(template_string).render(Context(dictionary))
+def render(template_string, dictionary=None, autoescape=False):
+    """
+    Render a template from the supplied string, with optional context data.
+
+    This differs from Django's normal template system in that autoescaping
+    is disabled by default. This is simply to make the tests below easier
+    to read and write. You can re-enable the default behavior by passing True
+    as the value of the autoescape parameter
+    """
+    context = Context(dictionary, autoescape=autoescape)
+    return Template(template_string).render(context)
 
 @nose.tools.raises(TemplateSyntaxError)
 def test_noargs_raises_exception():
@@ -79,7 +88,7 @@ def test_set_query_from_template_variables():
     rendered = render(template, data)
     assert rendered == 'http://www.google.com?foo=bar&bar=baz'
 
-def test_template_variables_are_not_double_escaped():
+def test_set_query_from_template_variables_not_double_escaped():
     template = """{% spurl base="http://www.google.com" query="{{ query }}" %}"""
     data = {'query': 'foo=bar&bar=foo'}
     rendered = render(template, data)
@@ -167,3 +176,13 @@ def test_sensible_defaults():
     template = """{% spurl path="/some/path/" host="www.google.com" %}"""
     rendered = render(template)
     assert rendered == 'http://www.google.com/some/path/'
+
+def test_autoescaping():
+    template = """{% spurl base="http://www.google.com" query="a=b" add_query="c=d" add_query="e=f" fragment="frag" %}"""
+    rendered = render(template, autoescape=True) # Ordinarily, templates will be autoescaped by default
+    assert rendered == 'http://www.google.com?a=b&amp;c=d&amp;e=f#frag'
+
+def test_disable_autoescaping_with_parameter():
+    template = """{% spurl base="http://www.google.com" query="a=b" add_query="c=d" autoescape="False" %}"""
+    rendered = render(template, autoescape=True)
+    assert rendered == 'http://www.google.com?a=b&c=d'
