@@ -4,8 +4,18 @@ from django.utils.encoding import smart_str
 from django.utils.datastructures import MultiValueDict
 from django.utils.html import escape
 from urlobject import URLObject, decode_query
+import re
 
 register = Library()
+
+TRUE_RE = re.compile(r'^(true|on)$', flags=re.IGNORECASE)
+
+def convert_to_boolean(string_or_boolean):
+    if isinstance(string_or_boolean, bool):
+        return string_or_boolean
+    if isinstance(string_or_boolean, basestring):
+        return bool(TRUE_RE.match(string_or_boolean))
+
 
 def render_template_from_string_without_autoescape(template_string, context):
     original_autoescape = context.autoescape
@@ -45,13 +55,7 @@ class SpurlNode(Node):
             url = URLObject(scheme='http')
 
         if 'secure' in kwargs:
-            secure = kwargs['secure']
-            if isinstance(secure, basestring):
-                if secure.lower() == 'true':
-                    secure = True
-                else:
-                    secure = False
-            if secure:
+            if convert_to_boolean(kwargs['secure']):
                 url = url.with_scheme('https')
             else:
                 url = url.with_scheme('http')
@@ -100,9 +104,7 @@ class SpurlNode(Node):
         # context.autoescape. This can be overridden by
         # passing and "autoescape" keyword to the tag.
         if 'autoescape' in kwargs:
-            autoescape = kwargs['autoescape']
-            if isinstance(autoescape, basestring):
-                autoescape = autoescape.lower() == 'true'
+            autoescape = convert_to_boolean(kwargs['autoescape'])
         else:
             autoescape = context.autoescape
 

@@ -190,7 +190,7 @@ Like the `query` argument above, the values passed to `add_query` can also be di
 
 #### secure
 
-Control whether the generated URL starts with `http` or `https`. The value of this argument can be a boolean (`True` or `False`), if you're using a context variable. If you're using a literal argument here, it must be a quoted string. The string `"True"` (case-insensitive) will be converted to `True`, any other string will be converted to `False`. Example:
+Control whether the generated URL starts with `http` or `https`. The value of this argument can be a boolean (`True` or `False`), if you're using a context variable. If you're using a literal argument here, it must be a quoted string. The strings `"True"` or `"on"` (case-insensitive) will be converted to `True`, any other string will be converted to `False`. Example:
 
     {% spurl base="http://example.com/" secure="True" %}
 
@@ -198,7 +198,7 @@ This will return `https://example.com/`
 
 #### autoescape
 
-By default, Spurl will escape its output in the same way as Django's template system. For example, an `&` character in a URL will be rendered as `&amp;`. You can override this behaviour by passing an `autoescape` argument, which must be either a boolean (if passed from a template variable) or a string (`"True"` or `"False"`).
+By default, Spurl will escape its output in the same way as Django's template system. For example, an `&` character in a URL will be rendered as `&amp;`. You can override this behaviour by passing an `autoescape` argument, which must be either a boolean (if passed from a template variable) or a string. The strings `"True"` or `"on"` (case-insensitive) will be converted to `True`, any other string will be converted to `False`.
 
 ## (Un)license
 

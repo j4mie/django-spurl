@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.template import Template, Context, loader, TemplateSyntaxError
+from .templatetags.spurl import convert_to_boolean
 import nose
 
 # bootstrap django
@@ -19,6 +20,19 @@ def render(template_string, dictionary=None, autoescape=False):
     """
     context = Context(dictionary, autoescape=autoescape)
     return Template(template_string).render(context)
+
+def test_convert_argument_value_to_boolean():
+    assert convert_to_boolean(True) is True
+    assert convert_to_boolean(False) is False
+    assert convert_to_boolean("True") is True
+    assert convert_to_boolean("true") is True
+    assert convert_to_boolean("On") is True
+    assert convert_to_boolean("on") is True
+    assert convert_to_boolean("False") is False
+    assert convert_to_boolean("false") is False
+    assert convert_to_boolean("Off") is False
+    assert convert_to_boolean("off") is False
+    assert convert_to_boolean("randomstring") is False
 
 @nose.tools.raises(TemplateSyntaxError)
 def test_noargs_raises_exception():
