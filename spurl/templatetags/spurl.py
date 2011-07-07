@@ -1,14 +1,16 @@
-from django.template import Template, Library, Node, TemplateSyntaxError
-from django.template.defaulttags import kwarg_re
-from django.utils.encoding import smart_str
-from django.utils.datastructures import MultiValueDict
-from django.utils.html import escape
-from urlobject import URLObject, decode_query
 import re
+from django.utils.html import escape
+from django.utils.encoding import smart_str
+from urlobject import URLObject, decode_query
+from django.template.defaulttags import kwarg_re
+from django.utils.datastructures import MultiValueDict
+from django.template import Template, Library, Node, TemplateSyntaxError
+
 
 register = Library()
 
 TRUE_RE = re.compile(r'^(true|on)$', flags=re.IGNORECASE)
+
 
 def convert_to_boolean(string_or_boolean):
     if isinstance(string_or_boolean, bool):
@@ -112,6 +114,7 @@ class SpurlNode(Node):
             url = escape(url)
 
         return url
+
 
 @register.tag
 def spurl(parser, token):
