@@ -102,7 +102,7 @@ class SpurlNode(Node):
 
         # Handle escaping. By default, use the value of
         # context.autoescape. This can be overridden by
-        # passing and "autoescape" keyword to the tag.
+        # passing an "autoescape" keyword to the tag.
         if 'autoescape' in kwargs:
             autoescape = convert_to_boolean(kwargs['autoescape'])
         else:
