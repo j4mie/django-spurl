@@ -8,9 +8,11 @@ from urlobject import URLObject, decode_query
 register = Library()
 
 def render_template_from_string_without_autoescape(template_string, context):
-    context_copy = context.__copy__()
-    context_copy.autoescape = False
-    return Template(template_string).render(context_copy)
+    original_autoescape = context.autoescape
+    context.autoescape = False
+    rendered = Template(template_string).render(context)
+    context.autoescape = original_autoescape
+    return rendered
 
 
 class SpurlNode(Node):
