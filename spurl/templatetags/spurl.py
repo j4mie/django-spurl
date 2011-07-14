@@ -37,18 +37,6 @@ class SpurlNode(Node):
         for key in self.kwargs:
             key = smart_str(key, 'ascii')
             values = [value.resolve(context) for value in self.kwargs.getlist(key)]
-
-            # If value is empty here, the user probably did something wrong.
-            # Django convention is to stay silent, but I think it's probably
-            # going to be more helpful to shout loudly here. Maybe this should
-            # only happen if we're in DEBUG mode?
-            for value in values:
-                if value == '':
-                    raise TemplateSyntaxError("'spurl' failed to find a value for the "
-                                              "key '%s'. If you are passing a literal "
-                                              "string to 'spurl', remember to surround "
-                                              "it with quotes." % key)
-
             kwargs.setlist(key, values)
 
         if 'base' in kwargs:
