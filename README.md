@@ -29,13 +29,9 @@
 
 ## Installation
 
-<del>You can install Spurl from PyPI:</del>
+You can install Spurl from PyPI:
 
-<del>    pip install django-spurl</del>
-
-**Coming soon!** For now, install directly from GitHub:
-
-    pip install git+git://github.com/j4mie/django-spurl.git#egg=spurl
+    pip install django-spurl
 
 Add `spurl` to your `INSTALLED_APPS`:
 
