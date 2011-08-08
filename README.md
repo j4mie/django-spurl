@@ -196,6 +196,13 @@ This will return `https://example.com/`
 
 By default, Spurl will escape its output in the same way as Django's template system. For example, an `&` character in a URL will be rendered as `&amp;`. You can override this behaviour by passing an `autoescape` argument, which must be either a boolean (if passed from a template variable) or a string. The strings `"True"` or `"on"` (case-insensitive) will be converted to `True`, any other string will be converted to `False`.
 
+#### Building a URL without displaying it
+
+Like Django's `{% url %}` tag, Spurl allows you to insert the generated URL into the template's context for later use. Example:
+
+    {% spurl base="http://example.com" secure="True" as secure_url %}
+    <p>The secure version of the url is {{ secure_url }}</p>
+
 ## (Un)license
 
 This is free and unencumbered software released into the public domain.

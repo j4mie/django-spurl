@@ -28,8 +28,9 @@ def render_template_from_string_without_autoescape(template_string, context):
 
 
 class SpurlNode(Node):
-    def __init__(self, kwargs):
+    def __init__(self, kwargs, asvar=None):
         self.kwargs = kwargs
+        self.asvar = asvar
 
     def render(self, context):
 
@@ -101,6 +102,10 @@ class SpurlNode(Node):
         if autoescape:
             url = escape(url)
 
+        if self.asvar:
+            context[self.asvar] = url
+            return ''
+
         return url
 
 
@@ -111,11 +116,16 @@ def spurl(parser, token):
         raise TemplateSyntaxError("'spurl' takes at least one argument")
 
     kwargs = MultiValueDict()
+    asvar = None
     bits = bits[1:]
+
+    if len(bits) >= 2 and bits[-2] == 'as':
+        asvar = bits[-1]
+        bits = bits[:-2]
 
     for bit in bits:
         name, value = kwarg_re.match(bit).groups()
         if not (name and value):
             raise TemplateSyntaxError("Malformed arguments to spurl tag")
         kwargs.appendlist(name, parser.compile_filter(value))
-    return SpurlNode(kwargs)
+    return SpurlNode(kwargs, asvar)

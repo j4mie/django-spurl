@@ -196,3 +196,8 @@ def test_disable_autoescaping_with_parameter():
     template = """{% spurl base="http://www.google.com" query="a=b" add_query="c=d" autoescape="False" %}"""
     rendered = render(template, autoescape=True)
     assert rendered == 'http://www.google.com?a=b&c=d'
+
+def test_url_as_template_variable():
+    template = """{% spurl base="http://www.google.com" as foo %}The url is {{ foo }}"""
+    rendered = render(template)
+    assert rendered == 'The url is http://www.google.com'
