@@ -65,6 +65,14 @@ class SpurlNode(Node):
                 for key, value in query_to_add.items():
                     url = url.add_query_param(key, value)
 
+        if 'set_query' in kwargs:
+            for query_to_set in kwargs.getlist('set_query'):
+                if isinstance(query_to_set, basestring):
+                    query_to_set = render_template_from_string_without_autoescape(query_to_set, context)
+                    query_to_set = dict(decode_query(query_to_set))
+                for key, value in query_to_set.items():
+                    url = url.set_query_param(key, value)
+
         if 'scheme' in kwargs:
             url = url.with_scheme(kwargs['scheme'])
 
