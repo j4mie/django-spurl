@@ -131,6 +131,28 @@ def test_add_to_query_from_template_variables():
     rendered = render(template, data)
     assert rendered == 'http://www.google.com/?foo=bar&bar=baz'
 
+def test_set_query_param_from_string():
+    template = """{% spurl base="http://www.google.com?something=somethingelse" set_query="something=foo&somethingelse=bar" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com?somethingelse=bar&something=foo'
+
+def test_set_query_param_from_dict_with_variable():
+    template = """{% spurl base=myurl set_query=myquery %}"""
+    data = {'myurl': 'http://www.google.com?something=somethingelse', 'myquery': {'something': 'foo', 'somethingelse': 'bar'}}
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com?somethingelse=bar&something=foo'
+
+def test_multiple_set_query():
+    template = """{% spurl base="http://www.google.com/?foo=test" set_query="foo=bar" set_query="bar=baz" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com/?foo=bar&bar=baz'
+
+def test_set_query_param_from_template_variables():
+    template = """{% spurl base="http://www.google.com/?foo=bar" set_query="foo={{ var }}" %}"""
+    data = {'var': 'baz'}
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com/?foo=baz'
+
 def test_override_scheme():
     template = """{% spurl base="http://google.com" scheme="ftp" %}"""
     rendered = render(template)
