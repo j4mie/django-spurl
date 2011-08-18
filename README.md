@@ -207,6 +207,15 @@ Like Django's `{% url %}` tag, Spurl allows you to insert the generated URL into
     {% spurl base="http://example.com" secure="True" as secure_url %}
     <p>The secure version of the url is {{ secure_url }}</p>
 
+
+## Development
+
+To contribute, fork the repository, make your changes, add some tests, commit, push, and open a pull request.
+
+### How to run the tests
+
+Spurl is tested with [nose](http://nose.readthedocs.org). Clone the repository, then run `pip install -r test-requirements.txt` to install nose and Django into your virtualenv. Then, simply type `nosetests` to find and run all the tests.
+
 ## (Un)license
 
 This is free and unencumbered software released into the public domain.
