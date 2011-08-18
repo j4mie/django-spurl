@@ -184,6 +184,10 @@ This will return `http://example.com?foo=bar&bar=baz`
 
 Like the `query` argument above, the values passed to `add_query` can also be dictionaries, and they can contain Django template variables.
 
+#### set_query
+
+Appends a set of parameters to an existing query, overwriting existing parameters with the same name. Otherwise uses the exact same syntax as `add_query`.
+
 #### secure
 
 Control whether the generated URL starts with `http` or `https`. The value of this argument can be a boolean (`True` or `False`), if you're using a context variable. If you're using a literal argument here, it must be a quoted string. The strings `"True"` or `"on"` (case-insensitive) will be converted to `True`, any other string will be converted to `False`. Example:
