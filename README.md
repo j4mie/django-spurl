@@ -29,24 +29,24 @@
 
 ## Changelog
 
-#### 0.1
+#### 0.4
 
-    * Initial release.
-
-#### 0.2
-
-    * Add `as` argument to insert generated URL into template context.
+* Upgrade URLObject dependency to 0.6.0
+* Add `remove_query` argument.
+* Add support for template tags embedded within argument values.
+* Extensive refactoring.
 
 #### 0.3
 
-    * Add `set_query_param` argument.
+* Add `set_query_param` argument.
 
-#### 0.4
+#### 0.2
 
-    * Upgrade URLObject dependency to 0.6.0
-    * Add `remove_query` argument.
-    * Add support for template tags embedded within argument values.
-    * Extensive refactoring.
+* Add `as` argument to insert generated URL into template context.
+
+#### 0.1
+
+* Initial release.
 
 ## Installation
 
@@ -109,7 +109,7 @@ Notice that Spurl's functionality doesn't overlap with Django's built-in `{% url
     {% url your_url_name as my_url %}
     <a href="{% spurl path=my_url query="foo=bar&bar=baz" %}">Click here!</a>
 
-There is another way to use Spurl with {% url %}, see "Embedding template tags" below.
+There is another way to use Spurl with {% url %}, see *Embedding template tags* below.
 
 ### Available arguments
 
@@ -250,18 +250,18 @@ As mentioned above, Spurl uses Django's template system to individually parse an
 
     {% spurl base="http://example.com" add_query="foo={{ bar }}" %}
 
-This works fine for variable and filters, but what if we want to use tags *inside* our Spurl tag? We can't use `{%` and `%}` inside another set of `{%` / `%}` tokens, because Django's template parser would get very confused. Instead, we have to escape the inner set of tag markers with backslashes:
+This works fine for variable and filters, but what if we want to use other template tags *inside* our Spurl tag? We can't nest `{%` and `%}` tokens inside each other, because Django's template parser would get very confused. Instead, we have to escape the inner set of tag markers with backslashes:
 
     {% spurl base="http://example.com" add_query="next={\% url home %\}" %}
 
-Note that any tags or filters loaded in your template are automatically available in the "inner" templates used to render each variable. This means we can do:
+Note that any tags or filters loaded in your template are automatically available in the nested templates used to render each variable. This means we can do:
 
     {% load url from future %}
     {% spurl base="{\% url 'home' %\}" %}
 
-Be careful with your quotation marks! If you use double-quotes to surround the value of the variable, you have to use single quotes inside it.
+Be careful with your quotation marks! If you use double-quotes to surround the nested template, you have to use single quotes inside it.
 
-**Warning** - this functionality only exists to serve the most complex of use cases, and is extremely magical (and probably a bad idea). You may prefer to use:
+**Warning!** This functionality only exists to serve the most complex of use cases, and is extremely magical (and probably a bad idea). You may prefer to use:
 
     {% url "home" as my_url %}
     {% spurl base=my_url %}
