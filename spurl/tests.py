@@ -159,6 +159,18 @@ def test_empty_parameters_preserved():
     rendered = render(template, data)
     assert rendered == 'http://www.google.com/?foo=bar&bar='
 
+def test_none_values_are_removed_when_setting_query():
+    template = """{% spurl base="http://www.google.com/?foo=bar" set_query="bar={{ nonevar|default_if_none:'' }}" %}"""
+    data = {'nonevar': None}
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com/?foo=bar&bar='
+
+def test_none_values_are_removed_when_adding_query():
+    template = """{% spurl base="http://www.google.com/?foo=bar" add_query="bar={{ nonevar|default_if_none:'' }}" %}"""
+    data = {'nonevar': None}
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com/?foo=bar&bar='
+
 def test_override_scheme():
     template = """{% spurl base="http://google.com" scheme="ftp" %}"""
     rendered = render(template)
