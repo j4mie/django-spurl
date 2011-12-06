@@ -73,6 +73,10 @@ class SpurlNode(Node):
                 for key, value in query_to_set.items():
                     url = url.set_query_param(key, value)
 
+        if 'remove_query' in kwargs:
+            for query_to_remove in kwargs.getlist('remove_query'):
+                url = url.without_query_param(query_to_remove)
+
         if 'scheme' in kwargs:
             url = url.with_scheme(kwargs['scheme'])
 

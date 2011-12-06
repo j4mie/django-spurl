@@ -171,6 +171,22 @@ def test_none_values_are_removed_when_adding_query():
     rendered = render(template, data)
     assert rendered == 'http://www.google.com/?foo=bar&bar='
 
+def test_remove_from_query():
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz" remove_query="foo" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com/?bar=baz'
+
+def test_remove_multiple_params():
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz" remove_query="foo" remove_query="bar" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com/'
+
+def test_remove_param_from_template_variable():
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz" remove_query=foo remove_query=bar %}"""
+    data = {'foo': 'foo', 'bar': 'bar'}
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com/'
+
 def test_override_scheme():
     template = """{% spurl base="http://google.com" scheme="ftp" %}"""
     rendered = render(template)

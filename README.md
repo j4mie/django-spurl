@@ -188,6 +188,20 @@ Like the `query` argument above, the values passed to `add_query` can also be di
 
 Appends a set of parameters to an existing query, overwriting existing parameters with the same name. Otherwise uses the exact same syntax as `add_query`.
 
+#### remove_query
+
+Remove a set of query parameters from an existing query:
+
+    {% spurl base="http://example.com/?foo=bar&bar=baz" remove_query="foo" %}
+
+This will return `http://example.com?bar=baz`
+
+Again, you can add multiple `remove_query` calls, and the results will be combined:
+
+    {% spurl base="http://example.com/?foo=bar&bar=baz" remove_query="foo" remove_query="bar" %}
+
+This will return `http://example.com/`
+
 #### secure
 
 Control whether the generated URL starts with `http` or `https`. The value of this argument can be a boolean (`True` or `False`), if you're using a context variable. If you're using a literal argument here, it must be a quoted string. The strings `"True"` or `"on"` (case-insensitive) will be converted to `True`, any other string will be converted to `False`. Example:
