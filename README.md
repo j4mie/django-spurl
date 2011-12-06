@@ -27,6 +27,27 @@
 
 **Spurl is currently in alpha and is probably not ready for production use**.
 
+## Changelog
+
+#### 0.1
+
+    * Initial release.
+
+#### 0.2
+
+    * Add `as` argument to insert generated URL into template context.
+
+#### 0.3
+
+    * Add `set_query_param` argument.
+
+#### 0.4
+
+    * Upgrade URLObject dependency to 0.6.0
+    * Add `remove_query` argument.
+    * Add support for template tags embedded within argument values.
+    * Extensive refactoring.
+
 ## Installation
 
 You can install Spurl from PyPI:
