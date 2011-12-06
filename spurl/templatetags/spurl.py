@@ -2,7 +2,7 @@ import re
 from django.conf import settings
 from django.utils.html import escape
 from django.utils.encoding import smart_str
-from urlobject import URLObject, decode_query
+from urlobject import URLObject, decode_query, URL_COMPONENTS
 from django.template import StringOrigin, Lexer, Parser
 from django.template.defaulttags import kwarg_re
 from django.utils.datastructures import MultiValueDict
@@ -21,18 +21,115 @@ def convert_to_boolean(string_or_boolean):
         return bool(TRUE_RE.match(string_or_boolean))
 
 
-def unescape_tags(template_string):
-    """Spurl allows the use of templatetags inside templatetags, if
-    the inner templatetags are escaped - {\% and %\}"""
-    return template_string.replace('{\%', '{%').replace('%\}', '%}')
+class SpurlURLBuilder(object):
 
-
-class SpurlNode(Node):
-    def __init__(self, kwargs, tags, filters, asvar=None):
-        self.kwargs = kwargs
-        self.asvar = asvar
+    def __init__(self, args, context, tags, filters):
+        self.args = args
+        self.context = context
         self.tags = tags
         self.filters = filters
+        self.autoescape = self.context.autoescape
+        self.url = URLObject(scheme='http')
+
+    def build(self):
+        for argument, value in self.args:
+            self.handle_argument(argument, value)
+
+        self.set_sensible_defaults()
+
+        url = unicode(self.url)
+
+        if self.autoescape:
+            url = escape(url)
+
+        return url
+
+    def handle_argument(self, argument, value):
+        argument = smart_str(argument, 'ascii')
+        handler_name = 'handle_%s' % argument
+        handler = getattr(self, handler_name, None)
+
+        if handler is not None:
+            value = value.resolve(self.context)
+            handler(value)
+
+    def handle_base(self, value):
+        base = self.prepare_value(value)
+        self.url = URLObject.parse(base)
+
+    def handle_secure(self, value):
+        is_secure = convert_to_boolean(value)
+        scheme = 'https' if is_secure else 'http'
+        self.url = self.url.with_scheme(scheme)
+
+    def handle_query(self, value):
+        query = self.prepare_value(value)
+        self.url = self.url.with_query(query)
+
+    def handle_add_query(self, value):
+        query_to_add = self.prepare_value(value)
+        if isinstance(query_to_add, basestring):
+            query_to_add = dict(decode_query(query_to_add))
+        for key, value in query_to_add.items():
+            self.url = self.url.add_query_param(key, value)
+
+    def handle_set_query(self, value):
+        query_to_set = self.prepare_value(value)
+        if isinstance(query_to_set, basestring):
+            query_to_set = dict(decode_query(query_to_set))
+        for key, value in query_to_set.items():
+            self.url = self.url.set_query_param(key, value)
+
+    def handle_remove_query(self, value):
+        self.url = self.url.without_query_param(value)
+
+    def handle_scheme(self, value):
+        self.url = self.url.with_scheme(value)
+
+    def handle_host(self, value):
+        host = self.prepare_value(value)
+        self.url = self.url.with_host(host)
+
+    def handle_path(self, value):
+        path = self.prepare_value(value)
+        self.url = self.url.with_path(path)
+
+    def handle_add_path(self, value):
+        path_to_add = self.prepare_value(value)
+        self.url = self.url.add_path_component(path_to_add)
+
+    def handle_fragment(self, value):
+        fragment = self.prepare_value(value)
+        self.url = self.url.with_fragment(fragment)
+
+    def handle_port(self, value):
+        self.url = self.url.with_port(value)
+
+    def handle_autoescape(self, value):
+        self.autoescape = convert_to_boolean(value)
+
+    def set_sensible_defaults(self):
+        if not self.url.host:
+            self.url = self.url.with_scheme('')
+
+    def prepare_value(self, value):
+        """Prepare a value by unescaping embedded template tags
+        and rendering through Django's template system"""
+        if isinstance(value, basestring):
+            value = self.unescape_tags(value)
+            value = self.render_template(value)
+        return value
+
+    def convert_to_boolean(self, string_or_boolean):
+        if isinstance(string_or_boolean, bool):
+            return string_or_boolean
+        if isinstance(string_or_boolean, basestring):
+            return bool(TRUE_RE.match(string_or_boolean))
+
+    def unescape_tags(self, template_string):
+        """Spurl allows the use of templatetags inside templatetags, if
+        the inner templatetags are escaped - {\% and %\}"""
+        return template_string.replace('{\%', '{%').replace('%\}', '%}')
 
     def compile_string(self, template_string, origin):
         """Re-implementation of django.template.base.compile_string
@@ -52,11 +149,11 @@ class SpurlNode(Node):
 
         return parser.parse()
 
-    def render_template(self, template_string, context):
+    def render_template(self, template_string):
         """Used to render an "inner" template, ie one which
         is passed as an argument to spurl"""
-        original_autoescape = context.autoescape
-        context.autoescape = False
+        original_autoescape = self.context.autoescape
+        self.context.autoescape = False
 
         template = Template('')
         if settings.TEMPLATE_DEBUG:
@@ -66,112 +163,22 @@ class SpurlNode(Node):
 
         template.nodelist = self.compile_string(template_string, origin)
 
-        rendered = template.render(context)
-        context.autoescape = original_autoescape
+        rendered = template.render(self.context)
+        self.context.autoescape = original_autoescape
         return rendered
 
+
+class SpurlNode(Node):
+
+    def __init__(self, args, tags, filters, asvar=None):
+        self.args = args
+        self.asvar = asvar
+        self.tags = tags
+        self.filters = filters
+
     def render(self, context):
-
-        kwargs = MultiValueDict()
-        for key in self.kwargs:
-            key = smart_str(key, 'ascii')
-            values = [value.resolve(context) for value in self.kwargs.getlist(key)]
-            kwargs.setlist(key, values)
-
-        if 'base' in kwargs:
-            base = kwargs['base']
-            if isinstance(base, basestring):
-                base = unescape_tags(base)
-                base = self.render_template(base, context)
-            url = URLObject.parse(base)
-        else:
-            url = URLObject(scheme='http')
-
-        if 'secure' in kwargs:
-            if convert_to_boolean(kwargs['secure']):
-                url = url.with_scheme('https')
-            else:
-                url = url.with_scheme('http')
-
-        if 'query' in kwargs:
-            query = kwargs['query']
-            if isinstance(query, basestring):
-                query = unescape_tags(query)
-                query = self.render_template(query, context)
-            url = url.with_query(query)
-
-        if 'add_query' in kwargs:
-            for query_to_add in kwargs.getlist('add_query'):
-                if isinstance(query_to_add, basestring):
-                    query_to_add = unescape_tags(query_to_add)
-                    query_to_add = self.render_template(query_to_add, context)
-                    query_to_add = dict(decode_query(query_to_add))
-                for key, value in query_to_add.items():
-                    url = url.add_query_param(key, value)
-
-        if 'set_query' in kwargs:
-            for query_to_set in kwargs.getlist('set_query'):
-                if isinstance(query_to_set, basestring):
-                    query_to_set = unescape_tags(query_to_set)
-                    query_to_set = self.render_template(query_to_set, context)
-                    query_to_set = dict(decode_query(query_to_set))
-                for key, value in query_to_set.items():
-                    url = url.set_query_param(key, value)
-
-        if 'remove_query' in kwargs:
-            for query_to_remove in kwargs.getlist('remove_query'):
-                url = url.without_query_param(query_to_remove)
-
-        if 'scheme' in kwargs:
-            url = url.with_scheme(kwargs['scheme'])
-
-        if 'host' in kwargs:
-            host = kwargs['host']
-            host = unescape_tags(host)
-            host = self.render_template(host, context)
-            url = url.with_host(host)
-
-        if 'path' in kwargs:
-            path = kwargs['path']
-            if isinstance(path, basestring):
-                path = unescape_tags(path)
-                path = self.render_template(path, context)
-            url = url.with_path(path)
-
-        if 'add_path' in kwargs:
-            for path_to_add in kwargs.getlist('add_path'):
-                if isinstance(path_to_add, basestring):
-                    path_to_add = unescape_tags(path_to_add)
-                    path_to_add = self.render_template(path_to_add, context)
-                url = url.add_path_component(path_to_add)
-
-        if 'fragment' in kwargs:
-            fragment = kwargs['fragment']
-            if isinstance(fragment, basestring):
-                fragment = unescape_tags(fragment)
-                fragment = self.render_template(fragment, context)
-            url = url.with_fragment(fragment)
-
-        if 'port' in kwargs:
-            url = url.with_port(kwargs['port'])
-
-        # sensible default
-        if not url.host:
-            url = url.with_scheme('')
-
-        # Convert the URLObject to its unicode representation
-        url = unicode(url)
-
-        # Handle escaping. By default, use the value of
-        # context.autoescape. This can be overridden by
-        # passing an "autoescape" keyword to the tag.
-        if 'autoescape' in kwargs:
-            autoescape = convert_to_boolean(kwargs['autoescape'])
-        else:
-            autoescape = context.autoescape
-
-        if autoescape:
-            url = escape(url)
+        builder = SpurlURLBuilder(self.args, context, self.tags, self.filters)
+        url = builder.build()
 
         if self.asvar:
             context[self.asvar] = url
@@ -186,7 +193,7 @@ def spurl(parser, token):
     if len(bits) < 2:
         raise TemplateSyntaxError("'spurl' takes at least one argument")
 
-    kwargs = MultiValueDict()
+    args = []
     asvar = None
     bits = bits[1:]
 
@@ -198,5 +205,5 @@ def spurl(parser, token):
         name, value = kwarg_re.match(bit).groups()
         if not (name and value):
             raise TemplateSyntaxError("Malformed arguments to spurl tag")
-        kwargs.appendlist(name, parser.compile_filter(value))
-    return SpurlNode(kwargs, parser.tags, parser.filters, asvar)
+        args.append((name, parser.compile_filter(value)))
+    return SpurlNode(args, parser.tags, parser.filters, asvar)
