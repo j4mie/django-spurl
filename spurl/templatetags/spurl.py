@@ -1,7 +1,9 @@
 import re
+from django.conf import settings
 from django.utils.html import escape
 from django.utils.encoding import smart_str
 from urlobject import URLObject, decode_query
+from django.template.base import StringOrigin, Lexer, Parser
 from django.template.defaulttags import kwarg_re
 from django.utils.datastructures import MultiValueDict
 from django.template import Template, Library, Node, TemplateSyntaxError
@@ -25,18 +27,48 @@ def unescape_tags(template_string):
     return template_string.replace('{\%', '{%').replace('%\}', '%}')
 
 
-def render_template_from_string_without_autoescape(template_string, context):
-    original_autoescape = context.autoescape
-    context.autoescape = False
-    rendered = Template(template_string).render(context)
-    context.autoescape = original_autoescape
-    return rendered
-
-
 class SpurlNode(Node):
-    def __init__(self, kwargs, asvar=None):
+    def __init__(self, kwargs, tags, filters, asvar=None):
         self.kwargs = kwargs
         self.asvar = asvar
+        self.tags = tags
+        self.filters = filters
+
+    def compile_string(self, template_string, origin):
+        """Re-implementation of django.template.base.compile_string
+        that takes into account the tags and filter of the parser
+        that rendered the parent template"""
+        if settings.TEMPLATE_DEBUG:
+            from django.template.debug import DebugLexer, DebugParser
+            lexer_class, parser_class = DebugLexer, DebugParser
+        else:
+            lexer_class, parser_class = Lexer, Parser
+        lexer = lexer_class(template_string, origin)
+        parser = parser_class(lexer.tokenize())
+
+        # Attach the tags and filters from the parent parser
+        parser.tags = self.tags
+        parser.filters = self.filters
+
+        return parser.parse()
+
+    def render_template(self, template_string, context):
+        """Used to render an "inner" template, ie one which
+        is passed as an argument to spurl"""
+        original_autoescape = context.autoescape
+        context.autoescape = False
+
+        template = Template('')
+        if settings.TEMPLATE_DEBUG:
+            origin = StringOrigin(template_string)
+        else:
+            origin = None
+
+        template.nodelist = self.compile_string(template_string, origin)
+
+        rendered = template.render(context)
+        context.autoescape = original_autoescape
+        return rendered
 
     def render(self, context):
 
@@ -50,7 +82,7 @@ class SpurlNode(Node):
             base = kwargs['base']
             if isinstance(base, basestring):
                 base = unescape_tags(base)
-                base = render_template_from_string_without_autoescape(base, context)
+                base = self.render_template(base, context)
             url = URLObject.parse(base)
         else:
             url = URLObject(scheme='http')
@@ -65,14 +97,14 @@ class SpurlNode(Node):
             query = kwargs['query']
             if isinstance(query, basestring):
                 query = unescape_tags(query)
-                query = render_template_from_string_without_autoescape(query, context)
+                query = self.render_template(query, context)
             url = url.with_query(query)
 
         if 'add_query' in kwargs:
             for query_to_add in kwargs.getlist('add_query'):
                 if isinstance(query_to_add, basestring):
                     query_to_add = unescape_tags(query_to_add)
-                    query_to_add = render_template_from_string_without_autoescape(query_to_add, context)
+                    query_to_add = self.render_template(query_to_add, context)
                     query_to_add = dict(decode_query(query_to_add))
                 for key, value in query_to_add.items():
                     url = url.add_query_param(key, value)
@@ -81,7 +113,7 @@ class SpurlNode(Node):
             for query_to_set in kwargs.getlist('set_query'):
                 if isinstance(query_to_set, basestring):
                     query_to_set = unescape_tags(query_to_set)
-                    query_to_set = render_template_from_string_without_autoescape(query_to_set, context)
+                    query_to_set = self.render_template(query_to_set, context)
                     query_to_set = dict(decode_query(query_to_set))
                 for key, value in query_to_set.items():
                     url = url.set_query_param(key, value)
@@ -96,28 +128,28 @@ class SpurlNode(Node):
         if 'host' in kwargs:
             host = kwargs['host']
             host = unescape_tags(host)
-            host = render_template_from_string_without_autoescape(host, context)
+            host = self.render_template(host, context)
             url = url.with_host(host)
 
         if 'path' in kwargs:
             path = kwargs['path']
             if isinstance(path, basestring):
                 path = unescape_tags(path)
-                path = render_template_from_string_without_autoescape(path, context)
+                path = self.render_template(path, context)
             url = url.with_path(path)
 
         if 'add_path' in kwargs:
             for path_to_add in kwargs.getlist('add_path'):
                 if isinstance(path_to_add, basestring):
                     path_to_add = unescape_tags(path_to_add)
-                    path_to_add = render_template_from_string_without_autoescape(path_to_add, context)
+                    path_to_add = self.render_template(path_to_add, context)
                 url = url.add_path_component(path_to_add)
 
         if 'fragment' in kwargs:
             fragment = kwargs['fragment']
             if isinstance(fragment, basestring):
                 fragment = unescape_tags(fragment)
-                fragment = render_template_from_string_without_autoescape(fragment, context)
+                fragment = self.render_template(fragment, context)
             url = url.with_fragment(fragment)
 
         if 'port' in kwargs:
@@ -167,4 +199,4 @@ def spurl(parser, token):
         if not (name and value):
             raise TemplateSyntaxError("Malformed arguments to spurl tag")
         kwargs.appendlist(name, parser.compile_filter(value))
-    return SpurlNode(kwargs, asvar)
+    return SpurlNode(kwargs, parser.tags, parser.filters, asvar)
