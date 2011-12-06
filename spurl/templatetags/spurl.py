@@ -119,12 +119,6 @@ class SpurlURLBuilder(object):
             value = self.render_template(value)
         return value
 
-    def convert_to_boolean(self, string_or_boolean):
-        if isinstance(string_or_boolean, bool):
-            return string_or_boolean
-        if isinstance(string_or_boolean, basestring):
-            return bool(TRUE_RE.match(string_or_boolean))
-
     def unescape_tags(self, template_string):
         """Spurl allows the use of templatetags inside templatetags, if
         the inner templatetags are escaped - {\% and %\}"""
