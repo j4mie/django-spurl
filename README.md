@@ -88,6 +88,8 @@ Notice that Spurl's functionality doesn't overlap with Django's built-in `{% url
     {% url your_url_name as my_url %}
     <a href="{% spurl path=my_url query="foo=bar&bar=baz" %}">Click here!</a>
 
+There is another way to use Spurl with {% url %}, see "Embedding template tags" below.
+
 ### Available arguments
 
 Below is a full list of arguments that Spurl understands.
@@ -214,13 +216,34 @@ This will return `https://example.com/`
 
 By default, Spurl will escape its output in the same way as Django's template system. For example, an `&` character in a URL will be rendered as `&amp;`. You can override this behaviour by passing an `autoescape` argument, which must be either a boolean (if passed from a template variable) or a string. The strings `"True"` or `"on"` (case-insensitive) will be converted to `True`, any other string will be converted to `False`.
 
-#### Building a URL without displaying it
+### Building a URL without displaying it
 
 Like Django's `{% url %}` tag, Spurl allows you to insert the generated URL into the template's context for later use. Example:
 
     {% spurl base="http://example.com" secure="True" as secure_url %}
     <p>The secure version of the url is {{ secure_url }}</p>
 
+### Embedding template tags
+
+As mentioned above, Spurl uses Django's template system to individually parse any arguments which can be passed strings. This allows the use of syntax such as:
+
+    {% spurl base="http://example.com" add_query="foo={{ bar }}" %}
+
+This works fine for variable and filters, but what if we want to use tags *inside* our Spurl tag? We can't use `{%` and `%}` inside another set of `{%` / `%}` tokens, because Django's template parser would get very confused. Instead, we have to escape the inner set of tag markers with backslashes:
+
+    {% spurl base="http://example.com" add_query="next={\% url home %\}" %}
+
+Note that any tags or filters loaded in your template are automatically available in the "inner" templates used to render each variable. This means we can do:
+
+    {% load url from future %}
+    {% spurl base="{\% url 'home' %\}" %}
+
+Be careful with your quotation marks! If you use double-quotes to surround the value of the variable, you have to use single quotes inside it.
+
+**Warning** - this functionality only exists to serve the most complex of use cases, and is extremely magical (and probably a bad idea). You may prefer to use:
+
+    {% url "home" as my_url %}
+    {% spurl base=my_url %}
 
 ## Development
 
