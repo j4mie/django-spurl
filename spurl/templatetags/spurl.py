@@ -80,7 +80,7 @@ class SpurlURLBuilder(object):
         for key, value in query_to_set.items():
             self.url = self.url.set_query_param(key, value)
 
-    def handle_remove_query(self, value):
+    def handle_remove_query_param(self, value):
         self.url = self.url.without_query_param(value)
 
     def handle_scheme(self, value):

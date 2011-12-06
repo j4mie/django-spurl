@@ -182,17 +182,17 @@ def test_none_values_are_removed_when_adding_query():
     assert rendered == 'http://www.google.com/?foo=bar&bar='
 
 def test_remove_from_query():
-    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz" remove_query="foo" %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz" remove_query_param="foo" %}"""
     rendered = render(template)
     assert rendered == 'http://www.google.com/?bar=baz'
 
 def test_remove_multiple_params():
-    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz" remove_query="foo" remove_query="bar" %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz" remove_query_param="foo" remove_query_param="bar" %}"""
     rendered = render(template)
     assert rendered == 'http://www.google.com/'
 
 def test_remove_param_from_template_variable():
-    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz" remove_query=foo remove_query=bar %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz" remove_query_param=foo remove_query_param=bar %}"""
     data = {'foo': 'foo', 'bar': 'bar'}
     rendered = render(template, data)
     assert rendered == 'http://www.google.com/'

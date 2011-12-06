@@ -190,17 +190,17 @@ Like the `query` argument above, the values passed to `add_query` can also be di
 
 Appends a set of parameters to an existing query, overwriting existing parameters with the same name. Otherwise uses the exact same syntax as `add_query`.
 
-#### remove_query
+#### remove_query_param
 
-Remove a set of query parameters from an existing query:
+Remove a query parameter from an existing query:
 
-    {% spurl base="http://example.com/?foo=bar&bar=baz" remove_query="foo" %}
+    {% spurl base="http://example.com/?foo=bar&bar=baz" remove_query_param="foo" %}
 
 This will return `http://example.com?bar=baz`
 
-Again, you can add multiple `remove_query` calls, and the results will be combined:
+Again, you can add multiple `remove_query_param` calls, and the results will be combined:
 
-    {% spurl base="http://example.com/?foo=bar&bar=baz" remove_query="foo" remove_query="bar" %}
+    {% spurl base="http://example.com/?foo=bar&bar=baz" remove_query_param="foo" remove_query_param="bar" %}
 
 This will return `http://example.com/`
 
