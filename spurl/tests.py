@@ -1,10 +1,20 @@
 from django.conf import settings
+from django.conf.urls.defaults import patterns, url
+from django.http import HttpResponse
 from django.template import Template, Context, loader, TemplateSyntaxError
 from .templatetags.spurl import convert_to_boolean
 import nose
 
+# This file acts as a urlconf
+urlpatterns = patterns('',
+    url('^test/$', lambda r: HttpResponse('ok'), name='test')
+)
+
 # bootstrap django
-settings.configure()
+settings.configure(
+    ROOT_URLCONF='spurl.tests',
+    INSTALLED_APPS=['spurl.tests'],
+)
 
 # add spurl to builtin tags
 loader.add_to_builtins('spurl.templatetags.spurl')
@@ -257,3 +267,12 @@ def test_url_as_template_variable():
     template = """{% spurl base="http://www.google.com" as foo %}The url is {{ foo }}"""
     rendered = render(template)
     assert rendered == 'The url is http://www.google.com'
+
+def test_reversing_inside_spurl_tag():
+    template = """{% spurl base="http://www.google.com/" path='{\% load url from future %\}{\% url "test" %\}' %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com/test/'
+
+    template = """{% spurl base="http://www.google.com/" query='{\% load url from future %\}next={\% url "test" %\}' %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com/?next=/test/'

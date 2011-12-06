@@ -19,6 +19,12 @@ def convert_to_boolean(string_or_boolean):
         return bool(TRUE_RE.match(string_or_boolean))
 
 
+def unescape_tags(template_string):
+    """Spurl allows the use of templatetags inside templatetags, if
+    the inner templatetags are escaped - {\% and %\}"""
+    return template_string.replace('{\%', '{%').replace('%\}', '%}')
+
+
 def render_template_from_string_without_autoescape(template_string, context):
     original_autoescape = context.autoescape
     context.autoescape = False
@@ -41,7 +47,11 @@ class SpurlNode(Node):
             kwargs.setlist(key, values)
 
         if 'base' in kwargs:
-            url = URLObject.parse(kwargs['base'])
+            base = kwargs['base']
+            if isinstance(base, basestring):
+                base = unescape_tags(base)
+                base = render_template_from_string_without_autoescape(base, context)
+            url = URLObject.parse(base)
         else:
             url = URLObject(scheme='http')
 
@@ -54,12 +64,14 @@ class SpurlNode(Node):
         if 'query' in kwargs:
             query = kwargs['query']
             if isinstance(query, basestring):
+                query = unescape_tags(query)
                 query = render_template_from_string_without_autoescape(query, context)
             url = url.with_query(query)
 
         if 'add_query' in kwargs:
             for query_to_add in kwargs.getlist('add_query'):
                 if isinstance(query_to_add, basestring):
+                    query_to_add = unescape_tags(query_to_add)
                     query_to_add = render_template_from_string_without_autoescape(query_to_add, context)
                     query_to_add = dict(decode_query(query_to_add))
                 for key, value in query_to_add.items():
@@ -68,6 +80,7 @@ class SpurlNode(Node):
         if 'set_query' in kwargs:
             for query_to_set in kwargs.getlist('set_query'):
                 if isinstance(query_to_set, basestring):
+                    query_to_set = unescape_tags(query_to_set)
                     query_to_set = render_template_from_string_without_autoescape(query_to_set, context)
                     query_to_set = dict(decode_query(query_to_set))
                 for key, value in query_to_set.items():
@@ -81,17 +94,31 @@ class SpurlNode(Node):
             url = url.with_scheme(kwargs['scheme'])
 
         if 'host' in kwargs:
-            url = url.with_host(kwargs['host'])
+            host = kwargs['host']
+            host = unescape_tags(host)
+            host = render_template_from_string_without_autoescape(host, context)
+            url = url.with_host(host)
 
         if 'path' in kwargs:
-            url = url.with_path(kwargs['path'])
+            path = kwargs['path']
+            if isinstance(path, basestring):
+                path = unescape_tags(path)
+                path = render_template_from_string_without_autoescape(path, context)
+            url = url.with_path(path)
 
         if 'add_path' in kwargs:
             for path_to_add in kwargs.getlist('add_path'):
+                if isinstance(path_to_add, basestring):
+                    path_to_add = unescape_tags(path_to_add)
+                    path_to_add = render_template_from_string_without_autoescape(path_to_add, context)
                 url = url.add_path_component(path_to_add)
 
         if 'fragment' in kwargs:
-            url = url.with_fragment(kwargs['fragment'])
+            fragment = kwargs['fragment']
+            if isinstance(fragment, basestring):
+                fragment = unescape_tags(fragment)
+                fragment = render_template_from_string_without_autoescape(fragment, context)
+            url = url.with_fragment(fragment)
 
         if 'port' in kwargs:
             url = url.with_port(kwargs['port'])
