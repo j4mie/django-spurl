@@ -1,1 +1,1 @@
-urlobject==0.5.1
+urlobject==0.6.0
