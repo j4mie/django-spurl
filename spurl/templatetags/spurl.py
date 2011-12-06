@@ -3,7 +3,7 @@ from django.conf import settings
 from django.utils.html import escape
 from django.utils.encoding import smart_str
 from urlobject import URLObject, decode_query
-from django.template.base import StringOrigin, Lexer, Parser
+from django.template import StringOrigin, Lexer, Parser
 from django.template.defaulttags import kwarg_re
 from django.utils.datastructures import MultiValueDict
 from django.template import Template, Library, Node, TemplateSyntaxError
