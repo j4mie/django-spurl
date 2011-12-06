@@ -153,6 +153,12 @@ def test_set_query_param_from_template_variables():
     rendered = render(template, data)
     assert rendered == 'http://www.google.com/?foo=baz'
 
+def test_empty_parameters_preserved():
+    template = """{% spurl base="http://www.google.com/?foo=bar" set_query="bar={{ emptyvar }}" %}"""
+    data = {} # does not contain and "emptyvar" key
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com/?foo=bar&bar='
+
 def test_override_scheme():
     template = """{% spurl base="http://google.com" scheme="ftp" %}"""
     rendered = render(template)
