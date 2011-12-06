@@ -269,10 +269,15 @@ def test_url_as_template_variable():
     assert rendered == 'The url is http://www.google.com'
 
 def test_reversing_inside_spurl_tag():
-    template = """{% load url from future %}{% spurl base="http://www.google.com/" path='{\% url "test" %\}' %}"""
+    template = """{% load url from future %}{% spurl base="http://www.google.com/" path="{\% url 'test' %\}" %}"""
     rendered = render(template)
     assert rendered == 'http://www.google.com/test/'
 
-    template = """{% load url from future %}{% spurl base="http://www.google.com/" query='next={\% url "test" %\}' %}"""
+    template = """{% load url from future %}{% spurl base="http://www.google.com/" query="next={\% url 'test' %\}" %}"""
     rendered = render(template)
     assert rendered == 'http://www.google.com/?next=/test/'
+
+def test_xzibit():
+    template = """Yo dawg, the URL is: {% spurl base="http://www.google.com/" query="foo={\% spurl base='http://another.com' secure='true' %\}" %}"""
+    rendered = render(template)
+    assert rendered == 'Yo dawg, the URL is: http://www.google.com/?foo=https://another.com'
