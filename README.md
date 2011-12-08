@@ -262,7 +262,7 @@ By default, Spurl will escape its output in the same way as Django's template sy
 
 ### Added bonus: `_from` parameters
 
-As well as the parameters above, Spurl supports a family of methods for *combining* URLs. Given a base URL to start with, you can copy a component from another URL. These arguments expect to be passed a full URL (or anything that can be understood by `URLObject.parse`). This URL will be parsed, and then the component in question will be extracted and combined with the base URL.
+As well as those listed above, Spurl provides a family of parameters for *combining* URLs. Given a base URL to start with, you can copy a component from another URL. These arguments expect to be passed a full URL (or anything that can be understood by `URLObject.parse`). This URL will be parsed, and then the component in question will be extracted and combined with the base URL.
 
 Below is a full list of the available `_from` methods. They have identical semantics to their counterparts above (except they expect a full URL, not just a URL component).
 
