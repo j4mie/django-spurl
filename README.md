@@ -29,16 +29,21 @@
 
 ## Changelog
 
+#### 0.5 (not yet released)
+
+* Fix typos in changelog.
+* Add family of arguments (`_from`) for combining URLs.
+
 #### 0.4
 
 * Upgrade URLObject dependency to 0.6.0
-* Add `remove_query` argument.
+* Add `remove_query_param` argument.
 * Add support for template tags embedded within argument values.
 * Extensive refactoring.
 
 #### 0.3
 
-* Add `set_query_param` argument.
+* Add `set_query` argument.
 
 #### 0.2
 
