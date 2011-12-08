@@ -65,10 +65,20 @@ class SpurlURLBuilder(object):
         query = self.prepare_value(value)
         self.url = self.url.with_query(query)
 
+    def handle_query_from(self, value):
+        url = URLObject.parse(value)
+        self.url = self.url.with_query(url.query)
+
     def handle_add_query(self, value):
         query_to_add = self.prepare_value(value)
         if isinstance(query_to_add, basestring):
             query_to_add = dict(decode_query(query_to_add))
+        for key, value in query_to_add.items():
+            self.url = self.url.add_query_param(key, value)
+
+    def handle_add_query_from(self, value):
+        url = URLObject.parse(value)
+        query_to_add = dict(decode_query(url.query))
         for key, value in query_to_add.items():
             self.url = self.url.add_query_param(key, value)
 
@@ -79,30 +89,63 @@ class SpurlURLBuilder(object):
         for key, value in query_to_set.items():
             self.url = self.url.set_query_param(key, value)
 
+    def handle_set_query_from(self, value):
+        url = URLObject.parse(value)
+        query_to_set = dict(decode_query(url.query))
+        for key, value in query_to_set.items():
+            self.url = self.url.set_query_param(key, value)
+
     def handle_remove_query_param(self, value):
         self.url = self.url.without_query_param(value)
 
     def handle_scheme(self, value):
         self.url = self.url.with_scheme(value)
 
+    def handle_scheme_from(self, value):
+        url = URLObject.parse(value)
+        self.url = self.url.with_scheme(url.scheme)
+
     def handle_host(self, value):
         host = self.prepare_value(value)
         self.url = self.url.with_host(host)
+
+    def handle_host_from(self, value):
+        url = URLObject.parse(value)
+        self.url = self.url.with_host(url.host)
 
     def handle_path(self, value):
         path = self.prepare_value(value)
         self.url = self.url.with_path(path)
 
+    def handle_path_from(self, value):
+        url = URLObject.parse(value)
+        self.url = self.url.with_path(url.path)
+
     def handle_add_path(self, value):
         path_to_add = self.prepare_value(value)
+        self.url = self.url.add_path_component(path_to_add)
+
+    def handle_add_path_from(self, value):
+        url = URLObject.parse(value)
+        path_to_add = url.path
+        if path_to_add.startswith('/'):
+            path_to_add = path_to_add[1:]
         self.url = self.url.add_path_component(path_to_add)
 
     def handle_fragment(self, value):
         fragment = self.prepare_value(value)
         self.url = self.url.with_fragment(fragment)
 
+    def handle_fragment_from(self, value):
+        url = URLObject.parse(value)
+        self.url = self.url.with_fragment(url.fragment)
+
     def handle_port(self, value):
         self.url = self.url.with_port(value)
+
+    def handle_port_from(self, value):
+        url = URLObject.parse(value)
+        self.url = self.url.with_port(url.port)
 
     def handle_autoescape(self, value):
         self.autoescape = convert_to_boolean(value)

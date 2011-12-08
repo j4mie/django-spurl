@@ -119,6 +119,12 @@ def test_set_query_removes_existing_query():
     rendered = render(template)
     assert rendered == 'http://www.google.com?foo=bar&bar=foo'
 
+def test_query_from():
+    template = """{% spurl base="http://www.google.com/" query_from=url %}"""
+    data = {'url': 'http://example.com/some/path/?foo=bar&bar=foo'}
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com/?foo=bar&bar=foo'
+
 def test_add_to_query_from_string():
     template = """{% spurl base="http://www.google.com?something=somethingelse" add_query="foo=bar&bar=foo" %}"""
     rendered = render(template)
@@ -140,6 +146,12 @@ def test_add_to_query_from_template_variables():
     data = {'var': 'baz'}
     rendered = render(template, data)
     assert rendered == 'http://www.google.com/?foo=bar&bar=baz'
+
+def test_add_query_from():
+    template = """{% spurl base="http://www.google.com/?bla=bla&flub=flub" add_query_from=url %}"""
+    data = {'url': 'http://example.com/some/path/?foo=bar&bar=foo'}
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com/?bla=bla&flub=flub&foo=bar&bar=foo'
 
 def test_set_query_param_from_string():
     template = """{% spurl base="http://www.google.com?something=somethingelse" set_query="something=foo&somethingelse=bar" %}"""
@@ -175,6 +187,12 @@ def test_none_values_are_removed_when_setting_query():
     rendered = render(template, data)
     assert rendered == 'http://www.google.com/?foo=bar&bar='
 
+def test_set_query_from():
+    template = """{% spurl base="http://www.google.com/?bla=bla&foo=something" set_query_from=url %}"""
+    data = {'url': 'http://example.com/some/path/?foo=bar&bar=foo'}
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com/?bla=bla&foo=bar&bar=foo'
+
 def test_none_values_are_removed_when_adding_query():
     template = """{% spurl base="http://www.google.com/?foo=bar" add_query="bar={{ nonevar|default_if_none:'' }}" %}"""
     data = {'nonevar': None}
@@ -202,15 +220,33 @@ def test_override_scheme():
     rendered = render(template)
     assert rendered == 'ftp://google.com'
 
+def test_scheme_from():
+    template = """{% spurl base="http://www.google.com/?bla=bla&foo=bar" scheme_from=url %}"""
+    data = {'url': 'https://example.com/some/path/?foo=bar&bar=foo'}
+    rendered = render(template, data)
+    assert rendered == 'https://www.google.com/?bla=bla&foo=bar'
+
 def test_override_host():
     template = """{% spurl base="http://www.google.com/some/path/" host="www.example.com" %}"""
     rendered = render(template)
     assert rendered == 'http://www.example.com/some/path/'
 
+def test_host_from():
+    template = """{% spurl base="http://www.google.com/?bla=bla&foo=bar" host_from=url %}"""
+    data = {'url': 'https://example.com/some/path/?foo=bar&bar=foo'}
+    rendered = render(template, data)
+    assert rendered == 'http://example.com/?bla=bla&foo=bar'
+
 def test_override_path():
     template = """{% spurl base="http://www.google.com/some/path/" path="/another/different/one/" %}"""
     rendered = render(template)
     assert rendered == 'http://www.google.com/another/different/one/'
+
+def test_path_from():
+    template = """{% spurl base="http://www.google.com/original/?bla=bla&foo=bar" path_from=url %}"""
+    data = {'url': 'https://example.com/some/path/?foo=bar&bar=foo'}
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com/some/path/?bla=bla&foo=bar'
 
 def test_add_path():
     template = """{% spurl base="http://www.google.com/some/path/" add_path="another/" %}"""
@@ -229,15 +265,33 @@ def test_multiple_add_path_from_template_variables():
     rendered = render(template, data)
     assert rendered == 'http://cdn.example.com/javascript/lib/jquery.js'
 
+def test_add_path_from():
+    template = """{% spurl base="http://www.google.com/original/?bla=bla&foo=bar" add_path_from=url %}"""
+    data = {'url': 'https://example.com/some/path/?foo=bar&bar=foo'}
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com/original/some/path/?bla=bla&foo=bar'
+
 def test_override_fragment():
     template = """{% spurl base="http://www.google.com/#somefragment" fragment="someotherfragment" %}"""
     rendered = render(template)
     assert rendered == 'http://www.google.com/#someotherfragment'
 
+def test_fragment_from():
+    template = """{% spurl base="http://www.google.com/?bla=bla&foo=bar#fragment" fragment_from=url %}"""
+    data = {'url': 'https://example.com/some/path/?foo=bar&bar=foo#newfragment'}
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com/?bla=bla&foo=bar#newfragment'
+
 def test_override_port():
     template = """{% spurl base="http://www.google.com:80" port="8080" %}"""
     rendered = render(template)
     assert rendered == 'http://www.google.com:8080'
+
+def test_port_from():
+    template = """{% spurl base="http://www.google.com:8000/?bla=bla&foo=bar" port_from=url %}"""
+    data = {'url': 'https://example.com:8888/some/path/?foo=bar&bar=foo'}
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com:8888/?bla=bla&foo=bar'
 
 def test_build_complete_url():
     template = """{% spurl scheme="http" host="www.google.com" path="/some/path/" port="8080" fragment="somefragment" %}"""

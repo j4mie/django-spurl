@@ -127,6 +127,8 @@ Set the scheme component of the URL. Example:
 
 This will return `ftp://example.com`
 
+See also: `scheme_from`, below.
+
 #### host
 
 Set the host component of the URL. Example:
@@ -134,6 +136,8 @@ Set the host component of the URL. Example:
     {% spurl base="http://example.com/some/path/" host="google.com" %}
 
 This will return `http://google.com/some/path/`
+
+See also: `host_from`, below.
 
 #### path
 
@@ -143,6 +147,8 @@ Set the path component of the URL. Example:
 
 This will return `http://example.com/different/`
 
+See also: `path_from`, below.
+
 #### add_path
 
 Append a path component to the existing path. You can add multiple `add_path` calls, and the results of each will be combined. Example:
@@ -150,6 +156,8 @@ Append a path component to the existing path. You can add multiple `add_path` ca
     {% spurl base=STATIC_URL add_path="javascript" add_path="lib" add_path="jquery.js" %}
 
 This will return `http://cdn.example.com/javascript/lib/jquery.js` (assuming `STATIC_URL` is set to `http://cdn.example.com`)
+
+See also: `add_path_from`, below.
 
 #### fragment
 
@@ -159,6 +167,8 @@ Set the fragment component of the URL. Example:
 
 This will return `http://example.com/#myfragment`
 
+See also: `fragment_from`, below.
+
 #### port
 
 Set the port component of the URL. Example:
@@ -166,6 +176,8 @@ Set the port component of the URL. Example:
     {% spurl base="http://example.com/some/path/" port="8080" %}
 
 This will return `http://example.com:8080/some/path/`
+
+See also: `port_from`, below.
 
 #### query
 
@@ -191,6 +203,8 @@ Finally, you can pass individual template variables to the query. To do this, Sp
 
     {% spurl base="http://example.com/" query="foo={{ variable_name }}" %}
 
+See also: `query_from`, below.
+
 #### add_query
 
 Append a set of parameters to an existing query. If your base URL might already have a query component, this will merge the existing parameters with your new ones. Example:
@@ -207,9 +221,13 @@ This will return `http://example.com?foo=bar&bar=baz`
 
 Like the `query` argument above, the values passed to `add_query` can also be dictionaries, and they can contain Django template variables.
 
+See also: `add_query_from`, below.
+
 #### set_query
 
 Appends a set of parameters to an existing query, overwriting existing parameters with the same name. Otherwise uses the exact same syntax as `add_query`.
+
+See also: `set_query_from`, below.
 
 #### remove_query_param
 
@@ -236,6 +254,28 @@ This will return `https://example.com/`
 #### autoescape
 
 By default, Spurl will escape its output in the same way as Django's template system. For example, an `&` character in a URL will be rendered as `&amp;`. You can override this behaviour by passing an `autoescape` argument, which must be either a boolean (if passed from a template variable) or a string. The strings `"True"` or `"on"` (case-insensitive) will be converted to `True`, any other string will be converted to `False`.
+
+### Added bonus: `_from` parameters
+
+As well as the parameters above, Spurl supports a family of methods for *combining* URLs. Given a base URL to start with, you can copy a component from another URL. These arguments expect to be passed a full URL (or anything that can be understood by `URLObject.parse`). This URL will be parsed, and then the component in question will be extracted and combined with the base URL.
+
+Below is a full list of the available `_from` methods. They have identical semantics to their counterparts above (except they expect a full URL, not just a URL component).
+
+* `query_from`
+* `add_query_from`
+* `set_query_from`
+* `scheme_from`
+* `host_from`
+* `path_from`
+* `add_path_from`
+* `fragment_from`
+* `port_from`
+
+Example:
+
+    {% spurl base="http://example.com/foo/bar/?foo=bar path_from="http://another.com/something/?bar=foo" %}
+
+This will return `http://example.com/something/?foo=bar`
 
 ### Building a URL without displaying it
 
