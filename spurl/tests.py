@@ -164,6 +164,29 @@ def test_set_query_param_from_dict_with_variable():
     rendered = render(template, data)
     assert rendered == 'http://www.google.com?somethingelse=bar&something=foo'
 
+def test_toggle_query():
+    template = """{% spurl base="http://www.google.com/?foo=bar" toggle_query="bar=first,second" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com/?foo=bar&bar=first'
+
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=first" toggle_query="bar=first,second" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com/?foo=bar&bar=second'
+
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=second" toggle_query="bar=first,second" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com/?foo=bar&bar=first'
+
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=first" toggle_query=to_toggle %}"""
+    data = {'to_toggle': {'bar': ('first', 'second')}}
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com/?foo=bar&bar=second'
+
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=second" toggle_query=to_toggle %}"""
+    data = {'to_toggle': {'bar': ('first', 'second')}}
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com/?foo=bar&bar=first'
+
 def test_multiple_set_query():
     template = """{% spurl base="http://www.google.com/?foo=test" set_query="foo=bar" set_query="bar=baz" %}"""
     rendered = render(template)

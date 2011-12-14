@@ -33,6 +33,7 @@
 
 * Fix typos in changelog.
 * Add family of arguments (`_from`) for combining URLs.
+* Add `toggle_query` argument.
 
 #### 0.4
 
@@ -233,6 +234,38 @@ See also: `add_query_from`, below.
 Appends a set of parameters to an existing query, overwriting existing parameters with the same name. Otherwise uses the exact same syntax as `add_query`.
 
 See also: `set_query_from`, below.
+
+#### toggle_query
+
+Toggle the value of one or more query parameters between two possible values. Useful when reordering list views. Example:
+
+    {% spurl base=request.get_full_path toggle_query="sort=ascending,descending" %}
+
+If the value of `request.get_full_path()` doesn't have a `sort` parameter, one will be added with a value of `ascending` (the first item in the list is the default). If it already has a `sort` parameter, and it is currently set to `ascending`, it will be set to `descending`. If it's already set to `descending`, it will be set to `ascending`.
+
+You can also specify the options as a dictionary, mapping the parameter name to a two-tuple containing the values to toggle. Example:
+
+    # views.py
+
+    SORT_PARAM = 'sort'
+    ASCENDING = 'ascending'
+    DESCENDING = 'descending'
+
+    def my_view(request):
+
+        if request.GET.get(SORT_PARAM, ASCENDING) == DESCENDING:
+            object_list = MyModel.objects.order_by('-somefield')
+        else:
+            object_list = MyModel.objects.order_by('somefield')
+
+        return render(request, 'path/to/template.html', {
+            'object_list': object_list,
+            'sort_params': {SORT_PARAM: (ASCENDING, DESCENDING)},
+        })
+
+    # Template
+
+    <a href="{% spurl base=request.get_full_path toggle_query=sort_params %}">Reverse order</a>
 
 #### remove_query_param
 

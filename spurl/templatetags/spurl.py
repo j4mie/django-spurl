@@ -98,6 +98,20 @@ class SpurlURLBuilder(object):
     def handle_remove_query_param(self, value):
         self.url = self.url.without_query_param(value)
 
+    def handle_toggle_query(self, value):
+        query_to_toggle = self.prepare_value(value)
+        if isinstance(query_to_toggle, basestring):
+            query_to_toggle = dict(decode_query(query_to_toggle))
+        current_query = self.url.query_dict()
+        for key, value in query_to_toggle.items():
+            if isinstance(value, basestring):
+                value = value.split(',')
+            first, second = value
+            if key in current_query and first in current_query[key]:
+                self.url = self.url.set_query_param(key, second)
+            else:
+                self.url = self.url.set_query_param(key, first)
+
     def handle_scheme(self, value):
         self.url = self.url.with_scheme(value)
 
