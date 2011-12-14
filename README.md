@@ -29,7 +29,7 @@
 
 ## Changelog
 
-#### 0.5 (not yet released)
+#### 0.5
 
 * Fix typos in changelog.
 * Add family of arguments (`_from`) for combining URLs.
