@@ -26,7 +26,7 @@ setup(
     author_email='jamie.matthews@gmail.com',
     url='http://github.com/j4mie/django-spurl/',
     packages=find_packages(),
-    install_requires=['urlobject==0.6.0'],
+    install_requires=['urlobject>=2.0.0'],
     classifiers = [
         'Programming Language :: Python',
         'Development Status :: 3 - Alpha',
