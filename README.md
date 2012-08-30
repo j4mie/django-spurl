@@ -25,33 +25,6 @@
 
 **Spurl** is a Django template library for manipulating URLs. It's built on top of Zachary Voase's excellent [urlobject](https://github.com/zacharyvoase/urlobject/).
 
-## Changelog
-
-#### 0.5
-
-* Fix typos in changelog.
-* Add family of arguments (`_from`) for combining URLs.
-* Add `toggle_query` argument.
-
-#### 0.4
-
-* Upgrade URLObject dependency to 0.6.0
-* Add `remove_query_param` argument.
-* Add support for template tags embedded within argument values.
-* Extensive refactoring.
-
-#### 0.3
-
-* Add `set_query` argument.
-
-#### 0.2
-
-* Add `as` argument to insert generated URL into template context.
-
-#### 0.1
-
-* Initial release.
-
 ## Installation
 
 You can install Spurl from PyPI:
@@ -349,6 +322,33 @@ To contribute, fork the repository, make your changes, add some tests, commit, p
 ### How to run the tests
 
 Spurl is tested with [nose](http://nose.readthedocs.org). Clone the repository, then run `pip install -r test-requirements.txt` to install nose and Django into your virtualenv. Then, simply type `nosetests` to find and run all the tests.
+
+## Changelog
+
+#### 0.5
+
+* Fix typos in changelog.
+* Add family of arguments (`_from`) for combining URLs.
+* Add `toggle_query` argument.
+
+#### 0.4
+
+* Upgrade URLObject dependency to 0.6.0
+* Add `remove_query_param` argument.
+* Add support for template tags embedded within argument values.
+* Extensive refactoring.
+
+#### 0.3
+
+* Add `set_query` argument.
+
+#### 0.2
+
+* Add `as` argument to insert generated URL into template context.
+
+#### 0.1
+
+* Initial release.
 
 ## (Un)license
 
