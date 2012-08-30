@@ -25,8 +25,6 @@
 
 **Spurl** is a Django template library for manipulating URLs. It's built on top of Zachary Voase's excellent [urlobject](https://github.com/zacharyvoase/urlobject/).
 
-**Spurl is currently in alpha and is probably not ready for production use**.
-
 ## Changelog
 
 #### 0.5
