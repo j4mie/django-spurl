@@ -358,3 +358,9 @@ def test_xzibit():
     template = """Yo dawg, the URL is: {% spurl base="http://www.google.com/" query="foo={\% spurl base='http://another.com' secure='true' %\}" %}"""
     rendered = render(template)
     assert rendered == 'Yo dawg, the URL is: http://www.google.com/?foo=https://another.com'
+
+def test_auth_with_username_and_password():
+    template = """{% spurl base=myurl auth=auth %}"""
+    data = {'myurl': 'https://www.google.com', 'auth': 'user:pass'}
+    rendered = render(template, data)
+    assert rendered == 'https://user:pass@www.google.com'
