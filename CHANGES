@@ -1,5 +1,9 @@
 ## Changelog
 
+#### WIP
+
+* Add support for template variables to `remove_query_param`.
+
 #### 0.6.1
 
 * Python 3 compatible!
