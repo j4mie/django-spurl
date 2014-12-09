@@ -17,7 +17,7 @@ TRUE_RE = re.compile(r'^(true|on)$', flags=re.IGNORECASE)
 def convert_to_boolean(string_or_boolean):
     if isinstance(string_or_boolean, bool):
         return string_or_boolean
-    if isinstance(string_or_boolean, basestring):
+    if isinstance(string_or_boolean, str):
         return bool(TRUE_RE.match(string_or_boolean))
 
 
@@ -37,7 +37,7 @@ class SpurlURLBuilder(object):
 
         self.set_sensible_defaults()
 
-        url = unicode(self.url)
+        url = self.url
 
         if self.autoescape:
             url = escape(url)
@@ -74,7 +74,7 @@ class SpurlURLBuilder(object):
 
     def handle_add_query(self, value):
         query_to_add = self.prepare_value(value)
-        if isinstance(query_to_add, basestring):
+        if isinstance(query_to_add, str):
             query_to_add = QueryString(query_to_add).dict
         self.url = self.url.add_query_params(**query_to_add)
 
@@ -84,7 +84,7 @@ class SpurlURLBuilder(object):
 
     def handle_set_query(self, value):
         query_to_set = self.prepare_value(value)
-        if isinstance(query_to_set, basestring):
+        if isinstance(query_to_set, str):
             query_to_set = QueryString(query_to_set).dict
         self.url = self.url.set_query_params(**query_to_set)
 
@@ -97,11 +97,11 @@ class SpurlURLBuilder(object):
 
     def handle_toggle_query(self, value):
         query_to_toggle = self.prepare_value(value)
-        if isinstance(query_to_toggle, basestring):
+        if isinstance(query_to_toggle, str):
             query_to_toggle = QueryString(query_to_toggle).dict
         current_query = self.url.query.dict
         for key, value in query_to_toggle.items():
-            if isinstance(value, basestring):
+            if isinstance(value, str):
                 value = value.split(',')
             first, second = value
             if key in current_query and first in current_query[key]:
@@ -168,7 +168,7 @@ class SpurlURLBuilder(object):
     def prepare_value(self, value):
         """Prepare a value by unescaping embedded template tags
         and rendering through Django's template system"""
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             value = self.unescape_tags(value)
             value = self.render_template(value)
         return value
