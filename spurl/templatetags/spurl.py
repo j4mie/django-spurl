@@ -37,7 +37,7 @@ class SpurlURLBuilder(object):
 
         self.set_sensible_defaults()
 
-        url = unicode(self.url)
+        url = self.url
 
         if self.autoescape:
             url = escape(url)
