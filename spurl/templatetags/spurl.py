@@ -17,7 +17,7 @@ TRUE_RE = re.compile(r'^(true|on)$', flags=re.IGNORECASE)
 def convert_to_boolean(string_or_boolean):
     if isinstance(string_or_boolean, bool):
         return string_or_boolean
-    if isinstance(string_or_boolean, basestring):
+    if isinstance(string_or_boolean, str):
         return bool(TRUE_RE.match(string_or_boolean))
 
 
