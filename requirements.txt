@@ -1,1 +1,4 @@
+django>=1.3
 urlobject>=2.0.0
+nose
+six
