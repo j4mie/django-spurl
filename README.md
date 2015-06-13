@@ -1,4 +1,4 @@
-# Spurl
+# django-spurl
 
 ### Super URLs for Django
 
@@ -24,7 +24,7 @@
 
 **Spurl** is a Django template library for manipulating URLs. It's built on top of Zachary Voase's excellent [urlobject](https://github.com/zacharyvoase/urlobject/).
 
-Authored by [Jamie Matthews](http://www.j4mie.org/), and some great [contributors](https://github.com/j4mie/django-cities/contributors).
+Authored by [Jamie Matthews](http://www.j4mie.org/), and some great [contributors](https://github.com/j4mie/django-spurl/contributors).
 
 [![Latest Version](https://img.shields.io/pypi/v/django-spurl.svg)](https://pypi.python.org/pypi/django-spurl/)
 [![Downloads](https://img.shields.io/pypi/dm/django-spurl.svg)](https://pypi.python.org/pypi/django-spurl/)
@@ -33,20 +33,20 @@ Authored by [Jamie Matthews](http://www.j4mie.org/), and some great [contributor
 
 ## Installation
 
-1. Either checkout ``spurl`` from GitHub, or install using pip:
+Either checkout ``spurl`` from GitHub, or install using pip:
 
 ```shell
 pip install django-spurl
 ```
 
-2. Add ``spurl`` to your `INSTALLED_APPS`:
+Add ``spurl`` to your `INSTALLED_APPS`:
 
 ```python
 INSTALLED_APPS = (
     ...
     'spurl',
 )
-
+```
 Finally, whenever you want to use Spurl in a template, you need to
 load its template library:
 
@@ -206,7 +206,7 @@ See also: ``add_path_from``, below.
 
 Set the fragment component of the URL. Example:
 
-``html
+```html
 {% spurl base="http://example.com" fragment="myfragment" %}
 ```
 
@@ -246,7 +246,7 @@ def my_view(request):
 ```
 
 ```html
-# template.html
+<!-- template.html -->
 {% spurl base="http://example.com/" query=my_query_params %}
 ```
 
@@ -335,7 +335,7 @@ def my_view(request):
 ```
 
 ```html
-# template.html
+<!-- template.html -->
 <a href="{% spurl base=request.get_full_path toggle_query=sort_params %}">Reverse order</a>
 ```
 
