@@ -1,14 +1,20 @@
 import re
+
 from django.conf import settings
-from django.utils import six
 from django.utils.html import escape
 from django.utils.encoding import smart_str
-from urlobject import URLObject
-from urlobject.query_string import QueryString
-from django.template import StringOrigin, Lexer, Parser
+from django.template.base import Lexer, Parser
+from django.template import StringOrigin
 from django.template.defaulttags import kwarg_re
 from django.template import Template, Library, Node, TemplateSyntaxError
 
+try:
+    from django.utils import six
+except ImportError:
+    import six
+
+from urlobject import URLObject
+from urlobject.query_string import QueryString
 
 register = Library()
 
