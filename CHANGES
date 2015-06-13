@@ -1,0 +1,34 @@
+## Changelog
+
+#### 0.6.1
+
+* Python 3 compatible!
+
+#### 0.6
+
+* Upgrade URLObject dependency to 2.0
+
+#### 0.5
+
+* Fix typos in changelog.
+* Add family of arguments (`_from`) for combining URLs.
+* Add `toggle_query` argument.
+
+#### 0.4
+
+* Upgrade URLObject dependency to 0.6.0
+* Add `remove_query_param` argument.
+* Add support for template tags embedded within argument values.
+* Extensive refactoring.
+
+#### 0.3
+
+* Add `set_query` argument.
+
+#### 0.2
+
+* Add `as` argument to insert generated URL into template context.
+
+#### 0.1
+
+* Initial release.

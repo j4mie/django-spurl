@@ -1,14 +1,20 @@
 import re
+
 from django.conf import settings
-from django.utils import six
 from django.utils.html import escape
 from django.utils.encoding import smart_str
-from urlobject import URLObject
-from urlobject.query_string import QueryString
-from django.template import StringOrigin, Lexer, Parser
+from django.template.base import Lexer, Parser
+from django.template import StringOrigin
 from django.template.defaulttags import kwarg_re
 from django.template import Template, Library, Node, TemplateSyntaxError
 
+try:
+    from django.utils import six
+except ImportError:
+    import six
+
+from urlobject import URLObject
+from urlobject.query_string import QueryString
 
 register = Library()
 
@@ -101,7 +107,7 @@ class SpurlURLBuilder(object):
         if isinstance(query_to_toggle, six.string_types):
             query_to_toggle = QueryString(query_to_toggle).dict
         current_query = self.url.query.dict
-        for key, value in query_to_toggle.items():
+        for key, value in list(query_to_toggle.items()):
             if isinstance(value, six.string_types):
                 value = value.split(',')
             first, second = value
@@ -170,8 +176,7 @@ class SpurlURLBuilder(object):
         """Prepare a value by unescaping embedded template tags
         and rendering through Django's template system"""
         if isinstance(value, six.string_types):
-            value = self.unescape_tags(value)
-            value = self.render_template(value)
+            value = self.render_template(self.unescape_tags(value))
         return value
 
     def unescape_tags(self, template_string):

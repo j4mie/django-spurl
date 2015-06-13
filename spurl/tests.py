@@ -1,9 +1,20 @@
+import nose
+
 from django.conf import settings
-from django.conf.urls.defaults import patterns, url
 from django.http import HttpResponse
 from django.template import Template, Context, loader, TemplateSyntaxError
+
+try:
+    from django.template.base import add_to_builtins
+except ImportError:  # Django < 1.8
+    from django.template import add_to_builtins
+
+try:
+    from django.conf.urls import patterns, url
+except ImportError:  # django < 1.4
+    from django.conf.urls.defaults import patterns, url
+
 from .templatetags.spurl import convert_to_boolean
-import nose
 
 # This file acts as a urlconf
 urlpatterns = patterns('',
@@ -17,7 +28,13 @@ settings.configure(
 )
 
 # add spurl to builtin tags
-loader.add_to_builtins('spurl.templatetags.spurl')
+add_to_builtins('spurl.templatetags.spurl')
+
+# see http://django.readthedocs.org/en/latest/releases/1.7.html#standalone-scripts
+import django
+if django.VERSION > (1, 6):
+    django.setup()
+
 
 def render(template_string, dictionary=None, autoescape=False):
     """

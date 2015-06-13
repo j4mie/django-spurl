@@ -1,38 +1,41 @@
 import os
-import re
 from setuptools import setup, find_packages
 
-description = 'A Django template library for manipulating URLs.'
+README = open(os.path.join(os.path.dirname(__file__), 'README.md')).read()
 
-rel_file = lambda *args: os.path.join(os.path.dirname(os.path.abspath(__file__)), *args)
+# allow setup.py to be run from any path
+os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
-def read_from(filename):
-    fp = open(filename)
-    try:
-        return fp.read()
-    finally:
-        fp.close()
-
-def get_version():
-    data = read_from(rel_file('spurl', '__init__.py'))
-    return re.search(r"__version__ = '([^']+)'", data).group(1)
+from spurl import __version__
 
 setup(
     name='django-spurl',
-    version=get_version(),
-    description=description,
-    long_description=description,
+    version=__version__,
+    packages=find_packages(exclude=['example']),
+    include_package_data=True,
+    license='Public Domain',
+    description='A Django template library for manipulating URLs.',
+    long_description=README,
+    url='http://github.com/j4mie/django-spurl',
     author='Jamie Matthews',
     author_email='jamie.matthews@gmail.com',
-    url='http://github.com/j4mie/django-spurl/',
-    packages=find_packages(),
-    install_requires=['urlobject>=2.0.0'],
+    install_requires=[
+        'urlobject>=2.0.0',
+        'six',
+    ],
     classifiers = [
-        'Programming Language :: Python',
-        'Development Status :: 3 - Alpha',
-        'Intended Audience :: Developers',
-        'License :: Public Domain',
+        'Environment :: Web Environment',
         'Framework :: Django',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: Public Domain',
         'Operating System :: OS Independent',
-    ]
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.4',
+        'Topic :: Internet :: WWW/HTTP',
+        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
+    ],
+    zip_safe=False,
 )
