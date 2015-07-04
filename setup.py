@@ -19,6 +19,8 @@ setup(
     url='http://github.com/j4mie/django-spurl',
     author='Jamie Matthews',
     author_email='jamie.matthews@gmail.com',
+    maintainer='Basil Shubin',
+    maintainer_email='basil.shubin@gmail.com',
     install_requires=[
         'urlobject>=2.0.0',
         'six',
