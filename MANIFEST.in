@@ -1,4 +1,3 @@
 include CHANGES
 include README.md
 include UNLICENSE
-recursive-include spurl/templatetags *
