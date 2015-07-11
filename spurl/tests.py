@@ -1,4 +1,5 @@
 import nose
+from collections import OrderedDict
 
 from django.conf import settings
 from django.http import HttpResponse
@@ -117,13 +118,17 @@ def test_set_query_from_dict_with_variable():
     template = """{% spurl base=myurl query=myquery %}"""
     data = {'myurl': 'http://www.google.com', 'myquery': {'foo': 'bar', 'bar': 'foo'}}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com?foo=bar&bar=foo'
+    if not 'http://www.google.com?' in rendered:
+        raise AssertionError
+    assert 'foo=bar' in rendered and 'bar=foo' in rendered
 
 def test_set_query_from_template_variables():
     template = """{% spurl base=myurl query="foo={{ first_var }}&bar={{ second_var }}" %}"""
-    data = {'myurl': 'http://www.google.com', 'first_var': 'bar', 'second_var': 'baz'}
+    data = {'myurl': 'http://www.google.com', 'first_var': 'bar', 'second_var': 'foo'}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com?foo=bar&bar=baz'
+    if not 'http://www.google.com?' in rendered:
+        raise AssertionError
+    assert 'foo=bar' in rendered and 'bar=foo' in rendered
 
 def test_set_query_from_template_variables_not_double_escaped():
     template = """{% spurl base="http://www.google.com" query="{{ query }}" %}"""
@@ -145,13 +150,17 @@ def test_query_from():
 def test_add_to_query_from_string():
     template = """{% spurl base="http://www.google.com?something=somethingelse" add_query="foo=bar&bar=foo" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com?something=somethingelse&foo=bar&bar=foo'
+    if not 'http://www.google.com?something=somethingelse' in rendered:
+        raise AssertionError
+    assert '&foo=bar' in rendered and '&bar=foo' in rendered
 
 def test_add_to_query_from_dict_with_variable():
     template = """{% spurl base=myurl add_query=myquery %}"""
     data = {'myurl': 'http://www.google.com?something=somethingelse', 'myquery': {'foo': 'bar', 'bar': 'foo'}}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com?something=somethingelse&foo=bar&bar=foo'
+    if not 'http://www.google.com?something=somethingelse' in rendered:
+        raise AssertionError
+    assert '&foo=bar' in rendered and '&bar=foo' in rendered
 
 def test_multiple_add_query():
     template = """{% spurl base="http://www.google.com/" add_query="foo=bar" add_query="bar=baz" %}"""
@@ -168,18 +177,24 @@ def test_add_query_from():
     template = """{% spurl base="http://www.google.com/?bla=bla&flub=flub" add_query_from=url %}"""
     data = {'url': 'http://example.com/some/path/?foo=bar&bar=foo'}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com/?bla=bla&flub=flub&foo=bar&bar=foo'
+    if not 'http://www.google.com/?bla=bla&flub=flub' in rendered:
+        raise AssertionError
+    assert '&foo=bar' in rendered and '&bar=foo' in rendered
 
 def test_set_query_param_from_string():
     template = """{% spurl base="http://www.google.com?something=somethingelse" set_query="something=foo&somethingelse=bar" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com?somethingelse=bar&something=foo'
+    if not 'http://www.google.com?' in rendered:
+        raise AssertionError
+    assert 'somethingelse=bar' in rendered and 'something=foo' in rendered
 
 def test_set_query_param_from_dict_with_variable():
     template = """{% spurl base=myurl set_query=myquery %}"""
     data = {'myurl': 'http://www.google.com?something=somethingelse', 'myquery': {'something': 'foo', 'somethingelse': 'bar'}}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com?somethingelse=bar&something=foo'
+    if not 'http://www.google.com?' in rendered:
+        raise AssertionError
+    assert 'somethingelse=bar' in rendered and 'something=foo' in rendered
 
 def test_toggle_query():
     template = """{% spurl base="http://www.google.com/?foo=bar" toggle_query="bar=first,second" %}"""
@@ -228,10 +243,12 @@ def test_none_values_are_removed_when_setting_query():
     assert rendered == 'http://www.google.com/?foo=bar&bar='
 
 def test_set_query_from():
-    template = """{% spurl base="http://www.google.com/?bla=bla&foo=something" set_query_from=url %}"""
-    data = {'url': 'http://example.com/some/path/?foo=bar&bar=foo'}
+    template = """{% spurl base="http://www.google.com?bla=bla&foo=something" set_query_from=url %}"""
+    data = {'url': 'http://example.com/some/path?foo=bar&bar=foo'}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com/?bla=bla&foo=bar&bar=foo'
+    if not 'http://www.google.com?' in rendered:
+        raise AssertionError
+    assert 'bla=bla' in rendered and 'foo=bar' in rendered and 'bar=foo' in rendered
 
 def test_none_values_are_removed_when_adding_query():
     template = """{% spurl base="http://www.google.com/?foo=bar" add_query="bar={{ nonevar|default_if_none:'' }}" %}"""
