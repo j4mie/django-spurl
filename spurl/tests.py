@@ -32,7 +32,7 @@ add_to_builtins('spurl.templatetags.spurl')
 
 # see http://django.readthedocs.org/en/latest/releases/1.7.html#standalone-scripts
 import django
-if django.VERSION > (1, 6):
+if django.VERSION >=(1, 7):
     django.setup()
 
 
