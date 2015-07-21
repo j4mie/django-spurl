@@ -6,6 +6,7 @@ python:
   - "2.7"
   - "2.6"
   - "pypy"
+  - "pypy3"
 env:
   - DJANGO_VERSION=1.4.21
   - DJANGO_VERSION=1.5.12
@@ -19,6 +20,8 @@ script:
   - env PYTHONPATH=`pwd` nosetests
 matrix:
   exclude:
+    - python: "pypy3"
+      env: DJANGO_VERSION=1.4.21
     - python: "3.4"
       env: DJANGO_VERSION=1.4.21
     - python: "3.3"
