@@ -26,6 +26,7 @@ setup(
         'six',
     ],
     classifiers = [
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'Framework :: Django',
         'Intended Audience :: Developers',
