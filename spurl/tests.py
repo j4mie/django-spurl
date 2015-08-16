@@ -266,7 +266,7 @@ def test_remove_multiple_params():
     assert rendered == 'http://www.google.com/'
 
 def test_remove_param_from_template_variable():
-    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz" remove_query_param=foo remove_query_param=bar %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz" remove_query_param="{{ foo }}" remove_query_param="{{ bar }}" %}"""
     data = {'foo': 'foo', 'bar': 'bar'}
     rendered = render(template, data)
     assert rendered == 'http://www.google.com/'
