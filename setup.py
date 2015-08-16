@@ -25,6 +25,14 @@ setup(
         'urlobject>=2.0.0',
         'six',
     ],
+    setup_requires=[
+        'urlobject>=2.0.0',
+        'django>=1.3',
+        'nose',
+        'six',
+    ],
+    test_suite='nose.collector',
+    tests_require=['nose'],
     classifiers = [
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',

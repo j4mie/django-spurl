@@ -13,11 +13,12 @@ env:
   - DJANGO_VERSION=1.6.11
   - DJANGO_VERSION=1.7.9
   - DJANGO_VERSION=1.8.3
-install:
+before_install:
   - pip install -q django==$DJANGO_VERSION
-  - pip install -q -r requirements.txt
+install:
+  - python setup.py develop
 script:
-  - env PYTHONPATH=`pwd` nosetests
+  - python setup.py nosetests
 matrix:
   exclude:
     - python: "pypy3"
