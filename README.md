@@ -359,8 +359,9 @@ This will return ``http://example.com/``
 
 Finally, you can pass individual template variables to the ``remove_query_param`` calls. To do this, Spurl uses Django's template system. For example:
 
+```html+django
 {% spurl base="http://example.com/?foo=bar&bar=baz" remove_query_param="{{ variable_name }}" %}
-
+```
 #### secure
 
 Control whether the generated URL starts with ``http`` or
