@@ -64,6 +64,10 @@ class SpurlURLBuilder(object):
         base = self.prepare_value(value)
         self.url = URLObject(base)
 
+    def handle_auth(self, value):
+        auth = self.prepare_value(value)
+        self.url = self.url.with_auth(*auth.split(':', 1))
+
     def handle_secure(self, value):
         is_secure = convert_to_boolean(value)
         scheme = 'https' if is_secure else 'http'
