@@ -176,6 +176,16 @@ This will return ``http://google.com/some/path/``
 
 See also: ``host_from``, below.
 
+#### auth
+
+Handle HTTP Basic authentication, username and password can be passed in URL. Example:
+
+```html+django
+{% spurl base="https://example.com" auth="user:pass" %}
+```
+
+This will return ``https://user:pass@example.com``
+
 #### path
 
 Set the path component of the URL. Example:
