@@ -1,8 +1,9 @@
 ## Changelog
 
-#### WIP
+#### 0.6.2
 
 * Add support for template variables to `remove_query_param`.
+* Handle auth parameters to be able to add username:password to URLs.
 
 #### 0.6.1
 
