@@ -104,7 +104,8 @@ class SpurlURLBuilder(object):
         self.url = self.url.set_query_params(**url.query.dict)
 
     def handle_remove_query_param(self, value):
-        self.url = self.url.del_query_param(value)
+        query_to_remove = self.prepare_value(value)
+        self.url = self.url.del_query_param(query_to_remove)
 
     def handle_toggle_query(self, value):
         query_to_toggle = self.prepare_value(value)

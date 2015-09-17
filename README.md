@@ -28,8 +28,8 @@ Authored by [Jamie Matthews](http://www.j4mie.org/), and some great [contributor
 
 [![Latest Version](https://img.shields.io/pypi/v/django-spurl.svg)](https://pypi.python.org/pypi/django-spurl/)
 [![Downloads](https://img.shields.io/pypi/dm/django-spurl.svg)](https://pypi.python.org/pypi/django-spurl/)
-[![License](https://img.shields.io/github/license/bashu/django-spurl.svg)](https://pypi.python.org/pypi/django-spurl/)
-[![Build Status](https://img.shields.io/travis/bashu/django-spurl.svg)](https://travis-ci.org/j4mie/django-spurl/)
+[![License](https://img.shields.io/github/license/j4mie/django-spurl.svg)](https://pypi.python.org/pypi/django-spurl/)
+[![Build Status](https://img.shields.io/travis/j4mie/django-spurl.svg)](https://travis-ci.org/j4mie/django-spurl/)
 
 ## Installation
 
@@ -50,7 +50,7 @@ INSTALLED_APPS = (
 Finally, whenever you want to use Spurl in a template, you need to
 load its template library:
 
-```html
+```html+django
 {% load spurl %}
 ```
 
@@ -74,7 +74,7 @@ Say you have a list of external URLs in your database. When you create
 links to these URLs in a template, you need to add a ``referrer=mysite.com``
 query parameter to each. The simple way to do this might be:
 
-```html
+```html+django
 {% for url, title in list_of_links %}
     <a href="{{ url }}?referrer=mysite.com">{{ title }}</a>
 {% endfor %}
@@ -87,7 +87,7 @@ generate malformed links like ``http://www.example.com?foo=bar?referrer=mysite.c
 Spurl can fix this. Because it knows about the components of a URL, it
 can add parameters onto an existing query, if there is one.
 
-```html
+```html+django
 {% for url, title in list_of_links %}
     <a href="{% spurl base=url add_query="referrer=mysite.com" %}">{{ title }}</a>
 {% endfor %}
@@ -108,7 +108,7 @@ loudly (displaying "Mixed content warnings" to the user) if the page
 being displayed is ``https`` but some of the assets are ``http``. Spurl
 can fix this.
 
-```html
+```html+django
 {% for image_url in list_of_image_urls %}
     <img src="{% spurl base=image_url secure=request.is_secure %}" />
 {% endfor %}
@@ -133,7 +133,7 @@ relative path (rather than a full URL) you should pass it using the
 ``path`` argument. For example, say you want to append some query
 parameters to a URL on your site:
 
-```html
+```html+django
 {% url your_url_name as my_url %}
 <a href="{% spurl path=my_url query="foo=bar&bar=baz" %}">Click here!</a>
 ```
@@ -156,7 +156,7 @@ URL from scratch based on the components that you pass in separately.
 
 Set the scheme component of the URL. Example:
 
-```html
+```html+django
 {% spurl base="http://example.com" scheme="ftp" %}
 ```
 
@@ -168,7 +168,7 @@ See also: ``scheme_from``, below.
 
 Set the host component of the URL. Example:
 
-```html
+```html+django
 {% spurl base="http://example.com/some/path/" host="google.com" %}
 ```
 
@@ -176,11 +176,21 @@ This will return ``http://google.com/some/path/``
 
 See also: ``host_from``, below.
 
+#### auth
+
+Handle HTTP Basic authentication, username and password can be passed in URL. Example:
+
+```html+django
+{% spurl base="https://example.com" auth="user:pass" %}
+```
+
+This will return ``https://user:pass@example.com``
+
 #### path
 
 Set the path component of the URL. Example:
 
-```html
+```html+django
 {% spurl base="http://example.com/some/path/" path="/different/" %}
 ```
 
@@ -193,7 +203,7 @@ See also: ``path_from``, below.
 Append a path component to the existing path. You can add multiple
 ``add_path`` calls, and the results of each will be combined. Example:
 
-```html
+```html+django
 {% spurl base=STATIC_URL add_path="javascript" add_path="lib" add_path="jquery.js" %}
 ```
 
@@ -206,7 +216,7 @@ See also: ``add_path_from``, below.
 
 Set the fragment component of the URL. Example:
 
-```html
+```html+django
 {% spurl base="http://example.com" fragment="myfragment" %}
 ```
 
@@ -218,7 +228,7 @@ See also: ``fragment_from``, below.
 
 Set the port component of the URL. Example:
 
-```html
+```html+django
 {% spurl base="http://example.com/some/path/" port="8080" %}
 ```
 
@@ -230,7 +240,7 @@ See also: ``port_from``, below.
 
 Set the query component of the URL. Example:
 
-```html
+```html+django
 {% spurl base="http://example.com/" query="foo=bar&bar=baz" %}
 ```
 
@@ -245,7 +255,7 @@ def my_view(request):
     return render(request, 'path/to/template.html', {'my_query_params': my_query_params})
 ```
 
-```html
+```html+django
 <!-- template.html -->
 {% spurl base="http://example.com/" query=my_query_params %}
 ```
@@ -255,7 +265,7 @@ This will return ``http://example.com/?foo=bar&bar=baz``
 Finally, you can pass individual template variables to the query. To
 do this, Spurl uses Django's template system. For example:
 
-```html
+```html+django
 {% spurl base="http://example.com/" query="foo={{ variable_name }}" %}
 ```
 
@@ -267,7 +277,7 @@ Append a set of parameters to an existing query. If your base URL
 might already have a query component, this will merge the existing
 parameters with your new ones. Example:
 
-```html
+```html+django
 {% spurl base="http://example.com/?foo=bar" add_query="bar=baz" %}
 ```
 
@@ -275,7 +285,7 @@ This will return ``http://example.com?foo=bar&bar=baz``
 
 You can add multiple ``add_query`` calls, and the results of each will be combined:
 
-```html
+```html+django
 {% spurl base="http://example.com/" add_query="foo=bar" add_query="bar=baz" %}
 ```
 
@@ -299,7 +309,7 @@ See also: ``set_query_from``, below.
 Toggle the value of one or more query parameters between two possible
 values. Useful when reordering list views. Example:
 
-```html
+```html+django
 {% spurl base=request.get_full_path toggle_query="sort=ascending,descending" %}
 ```
 
@@ -334,7 +344,7 @@ def my_view(request):
     })
 ```
 
-```html
+```html+django
 <!-- template.html -->
 <a href="{% spurl base=request.get_full_path toggle_query=sort_params %}">Reverse order</a>
 ```
@@ -343,7 +353,7 @@ def my_view(request):
 
 Remove a query parameter from an existing query:
 
-```html
+```html+django
 {% spurl base="http://example.com/?foo=bar&bar=baz" remove_query_param="foo" %}
 ```
 
@@ -351,12 +361,17 @@ This will return ``http://example.com?bar=baz``
 
 Again, you can add multiple ``remove_query_param`` calls, and the results will be combined:
 
-```html
+```html+django
 {% spurl base="http://example.com/?foo=bar&bar=baz" remove_query_param="foo" remove_query_param="bar" %}
 ```
 
 This will return ``http://example.com/``
 
+Finally, you can pass individual template variables to the ``remove_query_param`` calls. To do this, Spurl uses Django's template system. For example:
+
+```html+django
+{% spurl base="http://example.com/?foo=bar&bar=baz" remove_query_param="{{ variable_name }}" %}
+```
 #### secure
 
 Control whether the generated URL starts with ``http`` or
@@ -366,7 +381,7 @@ literal argument here, it must be a quoted string. The strings
 ``"True"`` or ``"on"`` (case-insensitive) will be converted to
 ``True``, any other string will be converted to ``False``. Example:
 
-```html
+```html+django
 {% spurl base="http://example.com/" secure="True" %}
 ```
 
@@ -407,7 +422,7 @@ full URL, not just a URL component).
 
 Example:
 
-```html
+```html+django
 {% spurl base="http://example.com/foo/bar/?foo=bar path_from="http://another.com/something/?bar=foo" %}
 ```
 
@@ -418,7 +433,7 @@ This will return ``http://example.com/something/?foo=bar``
 Like Django's ``{% url %}`` tag, Spurl allows you to insert the
 generated URL into the template's context for later use. Example:
 
-```html
+```html+django
 {% spurl base="http://example.com" secure="True" as secure_url %}
 <p>The secure version of the url is {{ secure_url }}</p>
 ```
@@ -429,7 +444,7 @@ As mentioned above, Spurl uses Django's template system to
 individually parse any arguments which can be passed strings. This
 allows the use of syntax such as:
 
-```html
+```html+django
 {% spurl base="http://example.com" add_query="foo={{ bar }}" %}
 ```
 
@@ -439,7 +454,7 @@ other template tags *inside* our Spurl tag? We can't nest ``{%`` and
 get very confused. Instead, we have to escape the inner set of tag
 markers with backslashes:
 
-```html
+```html+django
 {% spurl base="http://example.com" add_query="next={\% url home %\}" %}
 ```
 
@@ -447,7 +462,7 @@ Note that any tags or filters loaded in your template are
 automatically available in the nested templates used to render each
 variable. This means we can do:
 
-```html
+```html+django
 {% load url from future %}
 {% spurl base="{\% url 'home' %\}" %}
 ```
@@ -457,7 +472,7 @@ surround the nested template, you have to use single quotes inside it.
 
 **Warning!** This functionality only exists to serve the most complex of use cases, and is extremely magical (and probably a bad idea). You may prefer to use:
 
-```html
+```html+django
 {% url "home" as my_url %}
 {% spurl base=my_url %}
 ```
