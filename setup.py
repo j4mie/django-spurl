@@ -1,7 +1,10 @@
 import os
+import codecs
 from setuptools import setup, find_packages
 
-README = open(os.path.join(os.path.dirname(__file__), 'README.md')).read()
+def read(*parts):
+    return codecs.open(
+        os.path.join(os.path.dirname(__file__), *parts), encoding='utf-8').read()
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
@@ -15,7 +18,7 @@ setup(
     include_package_data=True,
     license='Public Domain',
     description='A Django template library for manipulating URLs.',
-    long_description=README,
+    long_description=read('README.md') + '\n\n' + read('CHANGES'),
     url='http://github.com/j4mie/django-spurl',
     author='Jamie Matthews',
     author_email='jamie.matthews@gmail.com',
