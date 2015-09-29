@@ -1,29 +1,29 @@
+#!/usr/bin/env python
+
 import os
+import re
+import sys
 import codecs
+
 from setuptools import setup, find_packages
 
 def read(*parts):
-    return codecs.open(
-        os.path.join(os.path.dirname(__file__), *parts), encoding='utf-8').read()
+    file_path = os.path.join(os.path.dirname(__file__), *parts)
+    return codecs.open(file_path, encoding='utf-8').read()
 
-# allow setup.py to be run from any path
-os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
-from spurl import __version__
+def find_version(*parts):
+    version_file = read(*parts)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
+    if version_match:
+        return str(version_match.group(1))
+    raise RuntimeError("Unable to find version string.")
 
 setup(
     name='django-spurl',
-    version=__version__,
-    packages=find_packages(exclude=['example']),
-    include_package_data=True,
+    version=find_version('spurl', '__init__.py'),
     license='Public Domain',
-    description='A Django template library for manipulating URLs.',
-    long_description=read('README.md') + '\n\n' + read('CHANGES'),
-    url='http://github.com/j4mie/django-spurl',
-    author='Jamie Matthews',
-    author_email='jamie.matthews@gmail.com',
-    maintainer='Basil Shubin',
-    maintainer_email='basil.shubin@gmail.com',
+
     install_requires=[
         'urlobject>=2.0.0',
         'six',
@@ -34,8 +34,26 @@ setup(
         'nose',
         'six',
     ],
+
+    description='A Django template library for manipulating URLs.',
+    long_description=read('README.md') + '\n\n' + read('CHANGES'),
+
+    author='Jamie Matthews',
+    author_email='jamie.matthews@gmail.com',
+
+    maintainer='Basil Shubin',
+    maintainer_email='basil.shubin@gmail.com',
+
+    url='http://github.com/j4mie/django-spurl',
+    download_url='https://github.com/j4mie/django-spurl/zipball/master',
+    
+    packages=find_packages(exclude=('example*', '*.tests*')),
+    include_package_data=True,
+
     test_suite='nose.collector',
     tests_require=['nose'],
+
+    zip_safe=False,
     classifiers = [
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
@@ -51,5 +69,4 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
-    zip_safe=False,
 )
