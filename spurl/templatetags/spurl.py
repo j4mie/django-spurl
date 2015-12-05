@@ -1,5 +1,6 @@
 import re
 
+import django
 from django.conf import settings
 from django.utils.html import escape
 from django.utils.encoding import smart_str
@@ -198,7 +199,10 @@ class SpurlURLBuilder(object):
             lexer_class, parser_class = DebugLexer, DebugParser
         else:
             lexer_class, parser_class = Lexer, Parser
-        lexer = lexer_class(template_string, origin)
+        if django.VERSION <(1, 9):
+            lexer = lexer_class(template_string, origin)
+        else:
+            lexer = lexer_class(template_string)
         parser = parser_class(lexer.tokenize())
 
         # Attach the tags and filters from the parent parser
