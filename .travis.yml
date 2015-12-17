@@ -4,8 +4,6 @@ python:
   - "3.3"
   - "2.7"
   - "2.6"
-  - "pypy"
-  - "pypy3"
 env:
   - DJANGO_VERSION=1.4.2
   - DJANGO_VERSION=1.5
@@ -21,15 +19,15 @@ script:
   - python setup.py nosetests
 matrix:
   exclude:
-    - python: "pypy3"
-      env: DJANGO_VERSION=1.4.2
-    - python: "3.4"
-      env: DJANGO_VERSION=1.4.2
-    - python: "3.3"
-      env: DJANGO_VERSION=1.4.2
     - python: "2.6"
       env: DJANGO_VERSION=1.7
     - python: "2.6"
       env: DJANGO_VERSION=1.8
     - python: "2.6"
       env: DJANGO_VERSION=1.9
+    - python: "3.3"
+      env: DJANGO_VERSION=1.4.2
+    - python: "3.3"
+      env: DJANGO_VERSION=1.9
+    - python: "3.4"
+      env: DJANGO_VERSION=1.4.2
