@@ -4,10 +4,12 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.template import Template, Context, loader, TemplateSyntaxError
 
-try:
-    from django.template.base import add_to_builtins
-except ImportError:  # Django < 1.8
-    from django.template import add_to_builtins
+import django
+if django.VERSION <(1, 9):
+    try:
+        from django.template.base import add_to_builtins
+    except ImportError:  # Django < 1.8
+        from django.template import add_to_builtins
 
 try:
     from django.conf.urls import patterns, url
@@ -22,13 +24,24 @@ urlpatterns = patterns('',
 )
 
 # bootstrap django
-settings.configure(
-    ROOT_URLCONF='spurl.tests',
-    INSTALLED_APPS=['spurl.tests'],
-)
+configure_kwargs = {
+    'ROOT_URLCONF': 'spurl.tests',
+    'INSTALLED_APPS': ['spurl.tests'],
+}
+if django.VERSION >=(1, 9):
+    configure_kwargs['TEMPLATES'] = [
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'OPTIONS': {
+                'builtins':['spurl.templatetags.spurl'],
+            }
+        }
+    ]
+settings.configure(**configure_kwargs)
 
 # add spurl to builtin tags
-add_to_builtins('spurl.templatetags.spurl')
+if django.VERSION <(1, 9):
+    add_to_builtins('spurl.templatetags.spurl')
 
 # see http://django.readthedocs.org/en/latest/releases/1.7.html#standalone-scripts
 import django
@@ -379,11 +392,18 @@ def test_url_as_template_variable():
     assert rendered == 'The url is http://www.google.com'
 
 def test_reversing_inside_spurl_tag():
-    template = """{% load url from future %}{% spurl base="http://www.google.com/" path="{\% url 'test' %\}" %}"""
+    template = """{% spurl base="http://www.google.com/" path="{\% url 'test' %\}" %}"""
+    if django.VERSION <(1, 9):
+        template = """{% load url from future %}{% spurl base="http://www.google.com/" path="{\% url 'test' %\}" %}"""
+    else:
+        template = """{% spurl base="http://www.google.com/" path="{\% url 'test' %\}" %}"""
     rendered = render(template)
     assert rendered == 'http://www.google.com/test/'
 
-    template = """{% load url from future %}{% spurl base="http://www.google.com/" query="next={\% url 'test' %\}" %}"""
+    if django.VERSION <(1, 9):
+        template = """{% load url from future %}{% spurl base="http://www.google.com/" query="next={\% url 'test' %\}" %}"""
+    else:
+        template = """{% spurl base="http://www.google.com/" query="next={\% url 'test' %\}" %}"""
     rendered = render(template)
     assert rendered == 'http://www.google.com/?next=/test/'
 
