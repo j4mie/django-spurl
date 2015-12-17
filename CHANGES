@@ -1,5 +1,9 @@
 ## Changelog
 
+#### 0.6.3
+
+* Django 1.9 compatible (Albert Koch)
+
 #### 0.6.2
 
 * Add support for template variables to `remove_query_param`.
