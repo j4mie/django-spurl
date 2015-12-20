@@ -195,8 +195,12 @@ class SpurlURLBuilder(object):
         that takes into account the tags and filter of the parser
         that rendered the parent template"""
         if settings.TEMPLATE_DEBUG:
-            from django.template.debug import DebugLexer, DebugParser
-            lexer_class, parser_class = DebugLexer, DebugParser
+            if django.VERSION <(1, 9):
+                from django.template.debug import DebugLexer, DebugParser
+                lexer_class, parser_class = DebugLexer, DebugParser
+            else:
+                from django.template.base import DebugLexer
+                lexer_class, parser_class = DebugLexer, Parser
         else:
             lexer_class, parser_class = Lexer, Parser
         if django.VERSION <(1, 9):
