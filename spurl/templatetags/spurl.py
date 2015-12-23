@@ -190,12 +190,12 @@ class SpurlURLBuilder(object):
         the inner templatetags are escaped - {\% and %\}"""
         return template_string.replace('{\%', '{%').replace('%\}', '%}')
 
-    def compile_string(self, template_string, origin):
+    def compile_string(self, template_string, origin, template_debug=False):
         """Re-implementation of django.template.base.compile_string
         that takes into account the tags and filter of the parser
         that rendered the parent template"""
-        if settings.TEMPLATE_DEBUG:
-            if django.VERSION <(1, 9):
+        if template_debug is True:
+            if django.VERSION < (1, 9):
                 from django.template.debug import DebugLexer, DebugParser
                 lexer_class, parser_class = DebugLexer, DebugParser
             else:
@@ -203,7 +203,7 @@ class SpurlURLBuilder(object):
                 lexer_class, parser_class = DebugLexer, Parser
         else:
             lexer_class, parser_class = Lexer, Parser
-        if django.VERSION <(1, 9):
+        if django.VERSION < (1, 9):
             lexer = lexer_class(template_string, origin)
         else:
             lexer = lexer_class(template_string)
@@ -222,12 +222,13 @@ class SpurlURLBuilder(object):
         self.context.autoescape = False
 
         template = Template('')
-        if settings.TEMPLATE_DEBUG:
+        template_debug = getattr(settings, 'TEMPLATE_DEBUG', template.engine.debug)
+        if template_debug is True:
             origin = StringOrigin(template_string)
         else:
             origin = None
 
-        template.nodelist = self.compile_string(template_string, origin)
+        template.nodelist = self.compile_string(template_string, origin, template_debug)
 
         rendered = template.render(self.context)
         self.context.autoescape = original_autoescape

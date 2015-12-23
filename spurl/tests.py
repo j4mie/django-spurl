@@ -11,24 +11,21 @@ if django.VERSION <(1, 9):
     except ImportError:  # Django < 1.8
         from django.template import add_to_builtins
 
-try:
-    from django.conf.urls import patterns, url
-except ImportError:  # django < 1.4
-    from django.conf.urls.defaults import patterns, url
+from django.conf.urls import url
 
 from .templatetags.spurl import convert_to_boolean
 
 # This file acts as a urlconf
-urlpatterns = patterns('',
+urlpatterns = [
     url('^test/$', lambda r: HttpResponse('ok'), name='test')
-)
+]
 
 # bootstrap django
 configure_kwargs = {
     'ROOT_URLCONF': 'spurl.tests',
     'INSTALLED_APPS': ['spurl.tests'],
 }
-if django.VERSION >=(1, 9):
+if django.VERSION >= (1, 9):
     configure_kwargs['TEMPLATES'] = [
         {
             'BACKEND': 'django.template.backends.django.DjangoTemplates',
