@@ -222,7 +222,9 @@ class SpurlURLBuilder(object):
         self.context.autoescape = False
 
         template = Template('')
-        template_debug = getattr(settings, 'TEMPLATE_DEBUG', template.engine.debug)
+        template_debug = getattr(
+            settings, 'TEMPLATE_DEBUG', template.engine.debug if hasattr(
+                template, 'engine') else False)
         if template_debug is True:
             origin = StringOrigin(template_string)
         else:
