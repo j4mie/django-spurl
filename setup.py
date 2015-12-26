@@ -30,7 +30,7 @@ setup(
     ],
     setup_requires=[
         'urlobject>=2.0.0',
-        'django>=1.3',
+        'django>=1.4',
         'nose',
         'six',
     ],
