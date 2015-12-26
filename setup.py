@@ -25,11 +25,11 @@ setup(
     license='Public Domain',
 
     install_requires=[
-        'urlobject>=2.0.0',
+        'urlobject>=2.4.0',
         'six',
     ],
     setup_requires=[
-        'urlobject>=2.0.0',
+        'urlobject>=2.4.0',
         'django>=1.4',
         'nose',
         'six',
