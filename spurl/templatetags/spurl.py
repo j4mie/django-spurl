@@ -230,7 +230,8 @@ class SpurlURLBuilder(object):
         else:
             origin = None
 
-        template.nodelist = self.compile_string(template_string, origin, template_debug)
+        template.nodelist = self.compile_string(
+            template_string, origin, template_debug)
 
         rendered = template.render(self.context)
         self.context.autoescape = original_autoescape
