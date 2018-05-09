@@ -5,7 +5,12 @@ from django.conf import settings
 from django.utils.html import escape
 from django.utils.encoding import smart_str
 from django.template.base import Lexer, Parser
-from django.template import StringOrigin
+
+try:
+    from django.template import StringOrigin as Origin
+except ImportError:
+    from django.template import Origin
+
 from django.template.defaulttags import kwarg_re
 from django.template import Template, Library, Node, TemplateSyntaxError
 
@@ -226,7 +231,7 @@ class SpurlURLBuilder(object):
             settings, 'TEMPLATE_DEBUG', template.engine.debug if hasattr(
                 template, 'engine') else False)
         if template_debug is True:
-            origin = StringOrigin(template_string)
+            origin = Origin(template_string)
         else:
             origin = None
 
