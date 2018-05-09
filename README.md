@@ -27,7 +27,6 @@
 Authored by [Jamie Matthews](http://www.j4mie.org/), and some great [contributors](https://github.com/j4mie/django-spurl/contributors).
 
 [![Latest Version](https://img.shields.io/pypi/v/django-spurl.svg)](https://pypi.python.org/pypi/django-spurl/)
-[![Downloads](https://img.shields.io/pypi/dm/django-spurl.svg)](https://pypi.python.org/pypi/django-spurl/)
 [![License](https://img.shields.io/github/license/j4mie/django-spurl.svg)](https://pypi.python.org/pypi/django-spurl/)
 [![Build Status](https://img.shields.io/travis/j4mie/django-spurl.svg)](https://travis-ci.org/j4mie/django-spurl/)
 
