@@ -117,6 +117,13 @@ class SpurlURLBuilder(object):
         else:
             self.url = self.url.del_query_param(query_to_remove)
 
+    def handle_remove_query_params_except(self, value):
+        params_to_keep = self.prepare_value(value).split(" ")
+        print(params_to_keep)
+        params_to_remove = [pair[0] for pair in self.url.query_list if pair[0] not in params_to_keep]
+        print(params_to_remove)
+        self.url = self.url.with_query(self.url.query.del_params(params_to_remove))
+
     def handle_toggle_query(self, value):
         query_to_toggle = self.prepare_value(value)
         if isinstance(query_to_toggle, six.string_types):

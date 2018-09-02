@@ -313,6 +313,19 @@ def test_remove_from_query():
     assert rendered == 'http://www.google.com/?bar=baz'
 
 
+def test_remove_except_from_query():
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz&baz=foo" remove_query_params_except="baz" %}"""
+    rendered = render(template)
+    assert rendered == 'http://www.google.com/?baz=foo'
+
+
+def test_remove_except_from_query_with_template_variable():
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz&baz=foo" remove_query_params_except="{{ baz }}" %}"""
+    data = {'baz': 'baz'}
+    rendered = render(template, data)
+    assert rendered == 'http://www.google.com/?baz=foo'
+
+
 def test_remove_from_query_with_value():
     template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz&bar=foo" remove_query_param="bar=foo" %}"""
     rendered = render(template)
