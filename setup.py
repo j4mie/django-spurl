@@ -36,7 +36,7 @@ setup(
     ],
 
     description='A Django template library for manipulating URLs.',
-    long_description=read('README.md') + '\n\n' + read('CHANGES'),
+    long_description=read('README.rst') + '\n\n' + read('CHANGES.rst'),
 
     author='Jamie Matthews',
     author_email='jamie.matthews@gmail.com',
@@ -66,7 +66,9 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
