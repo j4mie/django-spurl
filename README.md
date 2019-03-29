@@ -366,6 +366,14 @@ Again, you can add multiple ``remove_query_param`` calls, and the results will b
 
 This will return ``http://example.com/``
 
+You can also remove parameters with specific values:
+
+```html+django
+{% spurl base="http://example.com/?foo=bar&bar=baz&foo=baz" remove_query_param="foo" remove_query_param="foo=baz" %}
+```
+
+This will return ``http://example.com/?bar=baz``
+
 Finally, you can pass individual template variables to the ``remove_query_param`` calls. To do this, Spurl uses Django's template system. For example:
 
 ```html+django
