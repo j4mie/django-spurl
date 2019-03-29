@@ -111,7 +111,16 @@ class SpurlURLBuilder(object):
 
     def handle_remove_query_param(self, value):
         query_to_remove = self.prepare_value(value)
-        self.url = self.url.del_query_param(query_to_remove)
+        if '=' in query_to_remove:
+            k, v = query_to_remove.split('=', 1)
+            self.url = self.url.del_query_param_value(k, v)
+        else:
+            self.url = self.url.del_query_param(query_to_remove)
+
+    def handle_remove_query_params_except(self, value):
+        params_to_keep = self.prepare_value(value).split(" ")
+        params_to_remove = [pair[0] for pair in self.url.query_list if pair[0] not in params_to_keep]
+        self.url = self.url.with_query(self.url.query.del_params(params_to_remove))
 
     def handle_toggle_query(self, value):
         query_to_toggle = self.prepare_value(value)
