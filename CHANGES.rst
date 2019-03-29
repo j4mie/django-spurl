@@ -2,8 +2,8 @@
 Changelog
 ---------
 
-WIP
-~~~
+0.6.6
+~~~~~
 
 
 * Added support for an except clause to remove all but specifed query vars.
