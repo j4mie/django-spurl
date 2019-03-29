@@ -1,5 +1,14 @@
 ## Changelog
 
+#### WIP
+
+* Added support for an except clause to remove all but specifed query vars.
+
+#### 0.6.5
+
+* Added support for Django 2.x and dropped support for older and
+  non-LTS version of Django.
+
 #### 0.6.4
 
 * Getting ready for Django 1.10 release.
