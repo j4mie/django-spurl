@@ -378,7 +378,6 @@ Finally, you can pass individual template variables to the ``remove_query_param`
 
 ```html+django
 {% spurl base="http://example.com/?foo=bar&bar=baz" remove_query_param="{{ variable_name }}" %}
-{% spurl base="http://example.com/?foo=bar&bar=baz" remove_query_param="{{ variable_name }}={{ variable_name }}" %}
 ```
 #### secure
 
