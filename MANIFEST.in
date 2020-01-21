@@ -1,3 +1,3 @@
-include CHANGES
-include README.md
+include CHANGES.rst
+include README.rst
 include UNLICENSE
