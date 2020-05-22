@@ -16,11 +16,13 @@ env:
   - DJANGO="Django>=1.8,<1.9"
   - DJANGO="https://github.com/django/django/archive/master.tar.gz"
 before_install:
-  - pip install -q $DJANGO
+  - pip install -q $DJANGO coveralls
 install:
   - python setup.py develop
 script:
-  - python setup.py nosetests
+  - python setup.py nosetests --with-coverage --cover-package=spurl
+after_success:
+  - coveralls
 matrix:
   exclude:
     - python: "3.4"

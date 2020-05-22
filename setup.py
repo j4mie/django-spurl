@@ -30,7 +30,6 @@ setup(
     ],
     setup_requires=[
         'urlobject>=2.4.0',
-        'django>=1.4',
         'nose',
         'six',
     ],
@@ -50,8 +49,10 @@ setup(
     packages=find_packages(exclude=('example*', '*.tests*')),
     include_package_data=True,
 
+    tests_require=[
+        'nose',
+    ],
     test_suite='nose.collector',
-    tests_require=['nose'],
 
     zip_safe=False,
     classifiers = [

@@ -41,6 +41,9 @@ Authored by `Jamie Matthews <http://www.j4mie.org/>`__, and some great
 .. image:: https://img.shields.io/travis/j4mie/django-spurl.svg
     :target: https://travis-ci.org/j4mie/django-spurl/
 
+.. image:: https://coveralls.io/repos/github/j4mie/django-spurl/badge.svg?branch=develop
+	:target: https://coveralls.io/github/j4mie/django-spurl?branch=develop
+
 Installation
 ------------
 
