@@ -2,6 +2,12 @@
 Changelog
 ---------
 
+0.6.7
+~~~~~
+
+
+* Fixed MANIFEST.in
+
 0.6.6
 ~~~~~
 
