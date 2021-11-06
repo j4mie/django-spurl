@@ -22,13 +22,6 @@ Super URLs for Django
      |_(---'-| >-'-| |       '-'
             /_/     \_\
 
-**Spurl** is a Django template library for manipulating URLs. It's built
-on top of Zachary Voase's excellent
-`urlobject <https://github.com/zacharyvoase/urlobject/>`__.
-
-Authored by `Jamie Matthews <http://www.j4mie.org/>`__, and some great
-`contributors <https://github.com/j4mie/django-spurl/contributors>`__.
-
 .. image:: https://img.shields.io/pypi/v/django-spurl.svg
     :target: https://pypi.python.org/pypi/django-spurl/
 
@@ -42,7 +35,14 @@ Authored by `Jamie Matthews <http://www.j4mie.org/>`__, and some great
     :target: https://travis-ci.org/j4mie/django-spurl/
 
 .. image:: https://coveralls.io/repos/github/j4mie/django-spurl/badge.svg?branch=develop
-	:target: https://coveralls.io/github/j4mie/django-spurl?branch=develop
+    :target: https://coveralls.io/github/j4mie/django-spurl?branch=develop
+
+**Spurl** is a Django template library for manipulating URLs. It's built
+on top of Zachary Voase's excellent
+`urlobject <https://github.com/zacharyvoase/urlobject/>`__.
+
+Authored by `Jamie Matthews <http://www.j4mie.org/>`__, and some great
+`contributors <https://github.com/j4mie/django-spurl/contributors>`__.
 
 Installation
 ------------
