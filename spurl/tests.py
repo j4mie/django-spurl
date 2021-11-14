@@ -248,6 +248,11 @@ def test_toggle_query():
     rendered = render(template, data)
     assert rendered == "http://www.google.com/?foo=bar&bar=first"
 
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=javascript" toggle_query=to_toggle %}"""
+    data = {"to_toggle": {"bar": ("java", "javascript")}}
+    rendered = render(template, data)
+    assert rendered == "http://www.google.com/?foo=bar&bar=java"
+
 
 def test_multiple_set_query():
     template = """{% spurl base="http://www.google.com/?foo=test" set_query="foo=bar" set_query="bar=baz" %}"""
