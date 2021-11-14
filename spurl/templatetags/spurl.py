@@ -119,7 +119,7 @@ class SpurlURLBuilder(object):
             if isinstance(value, six.string_types):
                 value = value.split(",")
             first, second = value
-            if key in current_query and first in current_query[key]:
+            if key in current_query and first == current_query[key]:
                 self.url = self.url.set_query_param(key, second)
             else:
                 self.url = self.url.set_query_param(key, first)
