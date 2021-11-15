@@ -1,0 +1,5 @@
+django >= 1.4
+coverage
+nose
+six
+urlobject >= 2.0.0 

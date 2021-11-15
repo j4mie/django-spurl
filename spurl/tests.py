@@ -1,44 +1,29 @@
-import nose
 import django
-
+import nose
 from django.conf import settings
 from django.http import HttpResponse
-from django.template import Template, Context, TemplateSyntaxError
-
-if django.VERSION < (1, 9):
-    try:
-        from django.template.base import add_to_builtins
-    except ImportError:  # Django < 1.8
-        from django.template import add_to_builtins
-
-from django.conf.urls import url
+from django.template import Context, Template, TemplateSyntaxError
+from django.urls import path
 
 from spurl.templatetags.spurl import convert_to_boolean
 
 # This file acts as a urlconf
-urlpatterns = [
-    url('^test/$', lambda r: HttpResponse('ok'), name='test')
-]
+urlpatterns = [path("test/", lambda r: HttpResponse("ok"), name="test")]
 
 # bootstrap django
 configure_kwargs = {
-    'ROOT_URLCONF': 'spurl.tests',
-    'INSTALLED_APPS': ['spurl.tests'],
+    "ROOT_URLCONF": "spurl.tests",
+    "INSTALLED_APPS": ["spurl.tests"],
 }
-if django.VERSION >= (1, 9):
-    configure_kwargs['TEMPLATES'] = [
-        {
-            'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'OPTIONS': {
-                'builtins': ['spurl.templatetags.spurl'],
-            }
-        }
-    ]
+configure_kwargs["TEMPLATES"] = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "OPTIONS": {
+            "builtins": ["spurl.templatetags.spurl"],
+        },
+    }
+]
 settings.configure(**configure_kwargs)
-
-# add spurl to builtin tags
-if django.VERSION < (1, 9):
-    add_to_builtins('spurl.templatetags.spurl')
 
 if django.VERSION >= (1, 7):
     django.setup()
@@ -84,404 +69,415 @@ def test_malformed_args_raises_exception():
 def test_passthrough():
     template = """{% spurl base="http://www.google.com" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com'
+    assert rendered == "http://www.google.com"
 
 
 def test_url_in_variable():
     template = """{% spurl base=myurl %}"""
-    data = {'myurl': 'http://www.google.com'}
+    data = {"myurl": "http://www.google.com"}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com'
+    assert rendered == "http://www.google.com"
 
 
 def test_make_secure():
     template = """{% spurl base="http://www.google.com" secure="True" %}"""
     rendered = render(template)
-    assert rendered == 'https://www.google.com'
+    assert rendered == "https://www.google.com"
 
 
 def test_make_secure_with_variable():
     template = """{% spurl base=myurl secure=is_secure %}"""
-    data = {'myurl': 'http://www.google.com', 'is_secure': True}
+    data = {"myurl": "http://www.google.com", "is_secure": True}
     rendered = render(template, data)
-    assert rendered == 'https://www.google.com'
+    assert rendered == "https://www.google.com"
 
 
 def test_make_insecure():
     template = """{% spurl base="https://www.google.com" secure="False" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com'
+    assert rendered == "http://www.google.com"
 
 
 def test_make_insecure_with_variable():
     template = """{% spurl base=myurl secure=is_secure %}"""
-    data = {'myurl': 'https://www.google.com', 'is_secure': False}
+    data = {"myurl": "https://www.google.com", "is_secure": False}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com'
+    assert rendered == "http://www.google.com"
 
 
 def test_set_query_from_string():
     template = """{% spurl base="http://www.google.com" query="foo=bar&bar=foo" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com?foo=bar&bar=foo'
+    assert rendered == "http://www.google.com?foo=bar&bar=foo"
 
 
 def test_set_query_from_string_with_variable():
     template = """{% spurl base=myurl query=myquery %}"""
-    data = {'myurl': 'http://www.google.com', 'myquery': 'foo=bar&bar=foo'}
+    data = {"myurl": "http://www.google.com", "myquery": "foo=bar&bar=foo"}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com?foo=bar&bar=foo'
+    assert rendered == "http://www.google.com?foo=bar&bar=foo"
 
 
 def test_set_query_from_dict_with_variable():
     template = """{% spurl base=myurl query=myquery %}"""
     data = {
-        'myurl': 'http://www.google.com',
-        'myquery': {'foo': 'bar', 'bar': 'foo'},
+        "myurl": "http://www.google.com",
+        "myquery": {"foo": "bar", "bar": "foo"},
     }
     rendered = render(template, data)
-    if 'http://www.google.com?' not in rendered:
+    if "http://www.google.com?" not in rendered:
         raise AssertionError
-    assert 'foo=bar' in rendered and 'bar=foo' in rendered
+    assert "foo=bar" in rendered and "bar=foo" in rendered
 
 
 def test_set_query_from_template_variables():
     template = """{% spurl base=myurl query="foo={{ first_var }}&bar={{ second_var }}" %}"""
     data = {
-        'myurl': 'http://www.google.com',
-        'first_var': 'bar',
-        'second_var': 'foo',
+        "myurl": "http://www.google.com",
+        "first_var": "bar",
+        "second_var": "foo",
     }
     rendered = render(template, data)
-    if 'http://www.google.com?' not in rendered:
+    if "http://www.google.com?" not in rendered:
         raise AssertionError
-    assert 'foo=bar' in rendered and 'bar=foo' in rendered
+    assert "foo=bar" in rendered and "bar=foo" in rendered
 
 
 def test_set_query_from_template_variables_not_double_escaped():
     template = """{% spurl base="http://www.google.com" query="{{ query }}" %}"""
-    data = {'query': 'foo=bar&bar=foo'}
+    data = {"query": "foo=bar&bar=foo"}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com?foo=bar&bar=foo'
+    assert rendered == "http://www.google.com?foo=bar&bar=foo"
 
 
 def test_set_query_removes_existing_query():
     template = """{% spurl base="http://www.google.com?something=somethingelse" query="foo=bar&bar=foo" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com?foo=bar&bar=foo'
+    assert rendered == "http://www.google.com?foo=bar&bar=foo"
 
 
 def test_query_from():
     template = """{% spurl base="http://www.google.com/" query_from=url %}"""
-    data = {'url': 'http://example.com/some/path/?foo=bar&bar=foo'}
+    data = {"url": "http://example.com/some/path/?foo=bar&bar=foo"}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com/?foo=bar&bar=foo'
+    assert rendered == "http://www.google.com/?foo=bar&bar=foo"
 
 
 def test_add_to_query_from_string():
     template = """{% spurl base="http://www.google.com?something=somethingelse" add_query="foo=bar&bar=foo" %}"""
     rendered = render(template)
-    if 'http://www.google.com?something=somethingelse' not in rendered:
+    if "http://www.google.com?something=somethingelse" not in rendered:
         raise AssertionError
-    assert '&foo=bar' in rendered and '&bar=foo' in rendered
+    assert "&foo=bar" in rendered and "&bar=foo" in rendered
 
 
 def test_add_to_query_from_dict_with_variable():
     template = """{% spurl base=myurl add_query=myquery %}"""
     data = {
-        'myurl': 'http://www.google.com?something=somethingelse',
-        'myquery': {'foo': 'bar', 'bar': 'foo'},
+        "myurl": "http://www.google.com?something=somethingelse",
+        "myquery": {"foo": "bar", "bar": "foo"},
     }
     rendered = render(template, data)
-    if 'http://www.google.com?something=somethingelse' not in rendered:
+    if "http://www.google.com?something=somethingelse" not in rendered:
         raise AssertionError
-    assert '&foo=bar' in rendered and '&bar=foo' in rendered
+    assert "&foo=bar" in rendered and "&bar=foo" in rendered
 
 
 def test_multiple_add_query():
     template = """{% spurl base="http://www.google.com/" add_query="foo=bar" add_query="bar=baz" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com/?foo=bar&bar=baz'
+    assert rendered == "http://www.google.com/?foo=bar&bar=baz"
 
 
 def test_add_to_query_from_template_variables():
     template = """{% spurl base="http://www.google.com/?foo=bar" add_query="bar={{ var }}" %}"""
-    data = {'var': 'baz'}
+    data = {"var": "baz"}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com/?foo=bar&bar=baz'
+    assert rendered == "http://www.google.com/?foo=bar&bar=baz"
 
 
 def test_add_query_from():
     template = """{% spurl base="http://www.google.com/?bla=bla&flub=flub" add_query_from=url %}"""
-    data = {'url': 'http://example.com/some/path/?foo=bar&bar=foo'}
+    data = {"url": "http://example.com/some/path/?foo=bar&bar=foo"}
     rendered = render(template, data)
-    if 'http://www.google.com/?bla=bla&flub=flub' not in rendered:
+    if "http://www.google.com/?bla=bla&flub=flub" not in rendered:
         raise AssertionError
-    assert '&foo=bar' in rendered and '&bar=foo' in rendered
+    assert "&foo=bar" in rendered and "&bar=foo" in rendered
 
 
 def test_set_query_param_from_string():
     template = """{% spurl base="http://www.google.com?something=somethingelse" set_query="something=foo&somethingelse=bar" %}"""
     rendered = render(template)
-    if 'http://www.google.com?' not in rendered:
+    if "http://www.google.com?" not in rendered:
         raise AssertionError
-    assert 'somethingelse=bar' in rendered and 'something=foo' in rendered
+    assert "somethingelse=bar" in rendered and "something=foo" in rendered
 
 
 def test_set_query_param_from_dict_with_variable():
     template = """{% spurl base=myurl set_query=myquery %}"""
     data = {
-        'myurl': 'http://www.google.com?something=somethingelse',
-        'myquery': {'something': 'foo', 'somethingelse': 'bar'},
+        "myurl": "http://www.google.com?something=somethingelse",
+        "myquery": {"something": "foo", "somethingelse": "bar"},
     }
     rendered = render(template, data)
-    if 'http://www.google.com?' not in rendered:
+    if "http://www.google.com?" not in rendered:
         raise AssertionError
-    assert 'somethingelse=bar' in rendered and 'something=foo' in rendered
+    assert "somethingelse=bar" in rendered and "something=foo" in rendered
 
 
 def test_toggle_query():
     template = """{% spurl base="http://www.google.com/?foo=bar" toggle_query="bar=first,second" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com/?foo=bar&bar=first'
+    assert rendered == "http://www.google.com/?foo=bar&bar=first"
 
     template = """{% spurl base="http://www.google.com/?foo=bar&bar=first" toggle_query="bar=first,second" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com/?foo=bar&bar=second'
+    assert rendered == "http://www.google.com/?foo=bar&bar=second"
 
     template = """{% spurl base="http://www.google.com/?foo=bar&bar=second" toggle_query="bar=first,second" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com/?foo=bar&bar=first'
+    assert rendered == "http://www.google.com/?foo=bar&bar=first"
 
     template = """{% spurl base="http://www.google.com/?foo=bar&bar=first" toggle_query=to_toggle %}"""
-    data = {'to_toggle': {'bar': ('first', 'second')}}
+    data = {"to_toggle": {"bar": ("first", "second")}}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com/?foo=bar&bar=second'
+    assert rendered == "http://www.google.com/?foo=bar&bar=second"
 
     template = """{% spurl base="http://www.google.com/?foo=bar&bar=second" toggle_query=to_toggle %}"""
-    data = {'to_toggle': {'bar': ('first', 'second')}}
+    data = {"to_toggle": {"bar": ("first", "second")}}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com/?foo=bar&bar=first'
+    assert rendered == "http://www.google.com/?foo=bar&bar=first"
+
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=javascript" toggle_query=to_toggle %}"""
+    data = {"to_toggle": {"bar": ("java", "javascript")}}
+    rendered = render(template, data)
+    assert rendered == "http://www.google.com/?foo=bar&bar=java"
 
 
 def test_multiple_set_query():
     template = """{% spurl base="http://www.google.com/?foo=test" set_query="foo=bar" set_query="bar=baz" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com/?foo=bar&bar=baz'
+    assert rendered == "http://www.google.com/?foo=bar&bar=baz"
 
 
 def test_set_query_param_from_template_variables():
     template = """{% spurl base="http://www.google.com/?foo=bar" set_query="foo={{ var }}" %}"""
-    data = {'var': 'baz'}
+    data = {"var": "baz"}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com/?foo=baz'
+    assert rendered == "http://www.google.com/?foo=baz"
 
 
 def test_empty_parameters_preserved():
     template = """{% spurl base="http://www.google.com/?foo=bar" set_query="bar={{ emptyvar }}" %}"""
     data = {}  # does not contain and "emptyvar" key
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com/?foo=bar&bar='
+    assert rendered == "http://www.google.com/?foo=bar&bar="
 
 
 def test_none_values_are_removed_when_setting_query():
     template = """{% spurl base="http://www.google.com/?foo=bar" set_query="bar={{ nonevar|default_if_none:'' }}" %}"""
-    data = {'nonevar': None}
+    data = {"nonevar": None}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com/?foo=bar&bar='
+    assert rendered == "http://www.google.com/?foo=bar&bar="
 
 
 def test_set_query_from():
     template = """{% spurl base="http://www.google.com?bla=bla&foo=something" set_query_from=url %}"""
-    data = {'url': 'http://example.com/some/path?foo=bar&bar=foo'}
+    data = {"url": "http://example.com/some/path?foo=bar&bar=foo"}
     rendered = render(template, data)
-    if 'http://www.google.com?' not in rendered:
+    if "http://www.google.com?" not in rendered:
         raise AssertionError
-    assert 'bla=bla' in rendered and 'foo=bar' in rendered and 'bar=foo' in rendered
+    assert "bla=bla" in rendered and "foo=bar" in rendered and "bar=foo" in rendered
 
 
 def test_none_values_are_removed_when_adding_query():
     template = """{% spurl base="http://www.google.com/?foo=bar" add_query="bar={{ nonevar|default_if_none:'' }}" %}"""
-    data = {'nonevar': None}
+    data = {"nonevar": None}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com/?foo=bar&bar='
+    assert rendered == "http://www.google.com/?foo=bar&bar="
 
 
 def test_remove_from_query():
     template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz" remove_query_param="foo" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com/?bar=baz'
+    assert rendered == "http://www.google.com/?bar=baz"
 
 
 def test_remove_except_from_query():
     template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz&baz=foo" remove_query_params_except="baz" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com/?baz=foo'
+    assert rendered == "http://www.google.com/?baz=foo"
 
 
 def test_remove_except_from_query_with_template_variable():
-    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz&baz=foo" remove_query_params_except="{{ baz }}" %}"""
-    data = {'baz': 'baz'}
+    template = (
+        """{% spurl base="http://www.google.com/?foo=bar&bar=baz&baz=foo" remove_query_params_except="{{ baz }}" %}"""
+    )
+    data = {"baz": "baz"}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com/?baz=foo'
+    assert rendered == "http://www.google.com/?baz=foo"
 
 
 def test_remove_from_query_with_value():
     template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz&bar=foo" remove_query_param="bar=foo" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com/?foo=bar&bar=baz'
+    assert rendered == "http://www.google.com/?foo=bar&bar=baz"
 
 
 def test_remove_multiple_from_query_with_value():
     template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz&bar=foo&foo=baz" remove_query_param="bar=foo" remove_query_param="foo=baz" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com/?foo=bar&bar=baz'
+    assert rendered == "http://www.google.com/?foo=bar&bar=baz"
 
 
 def test_remove_multiple_params():
     template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz" remove_query_param="foo" remove_query_param="bar" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com/'
+    assert rendered == "http://www.google.com/"
 
 
 def test_remove_from_query_with_value_from_template_variable():
     template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz&bar=foo&foo=baz" remove_query_param="{{ foo }}={{ baz }}" remove_query_param="{{ bar }}={{ foo }}" %}"""
-    data = {'foo': 'foo', 'bar': 'bar', 'baz': 'baz'}
+    data = {"foo": "foo", "bar": "bar", "baz": "baz"}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com/?foo=bar&bar=baz'
+    assert rendered == "http://www.google.com/?foo=bar&bar=baz"
 
 
 def test_remove_param_from_template_variable():
     template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz" remove_query_param="{{ foo }}" remove_query_param="{{ bar }}" %}"""
-    data = {'foo': 'foo', 'bar': 'bar'}
+    data = {"foo": "foo", "bar": "bar"}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com/'
+    assert rendered == "http://www.google.com/"
 
 
 def test_override_scheme():
     template = """{% spurl base="http://google.com" scheme="ftp" %}"""
     rendered = render(template)
-    assert rendered == 'ftp://google.com'
+    assert rendered == "ftp://google.com"
 
 
 def test_scheme_from():
     template = """{% spurl base="http://www.google.com/?bla=bla&foo=bar" scheme_from=url %}"""
-    data = {'url': 'https://example.com/some/path/?foo=bar&bar=foo'}
+    data = {"url": "https://example.com/some/path/?foo=bar&bar=foo"}
     rendered = render(template, data)
-    assert rendered == 'https://www.google.com/?bla=bla&foo=bar'
+    assert rendered == "https://www.google.com/?bla=bla&foo=bar"
 
 
 def test_override_host():
     template = """{% spurl base="http://www.google.com/some/path/" host="www.example.com" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.example.com/some/path/'
+    assert rendered == "http://www.example.com/some/path/"
 
 
 def test_host_from():
     template = """{% spurl base="http://www.google.com/?bla=bla&foo=bar" host_from=url %}"""
-    data = {'url': 'https://example.com/some/path/?foo=bar&bar=foo'}
+    data = {"url": "https://example.com/some/path/?foo=bar&bar=foo"}
     rendered = render(template, data)
-    assert rendered == 'http://example.com/?bla=bla&foo=bar'
+    assert rendered == "http://example.com/?bla=bla&foo=bar"
 
 
 def test_override_path():
     template = """{% spurl base="http://www.google.com/some/path/" path="/another/different/one/" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com/another/different/one/'
+    assert rendered == "http://www.google.com/another/different/one/"
 
 
 def test_path_from():
     template = """{% spurl base="http://www.google.com/original/?bla=bla&foo=bar" path_from=url %}"""
-    data = {'url': 'https://example.com/some/path/?foo=bar&bar=foo'}
+    data = {"url": "https://example.com/some/path/?foo=bar&bar=foo"}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com/some/path/?bla=bla&foo=bar'
+    assert rendered == "http://www.google.com/some/path/?bla=bla&foo=bar"
 
 
 def test_add_path():
     template = """{% spurl base="http://www.google.com/some/path/" add_path="another/" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com/some/path/another/'
+    assert rendered == "http://www.google.com/some/path/another/"
 
 
 def test_multiple_add_path():
     template = """{% spurl base="http://www.google.com/" add_path="some" add_path="another/" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com/some/another/'
+    assert rendered == "http://www.google.com/some/another/"
 
 
 def test_multiple_add_path_from_template_variables():
     """Usage example for building media urls"""
     template = """{% spurl base=STATIC_URL add_path="javascript" add_path="lib" add_path="jquery.js" %}"""
-    data = {'STATIC_URL': 'http://cdn.example.com'}
+    data = {"STATIC_URL": "http://cdn.example.com"}
     rendered = render(template, data)
-    assert rendered == 'http://cdn.example.com/javascript/lib/jquery.js'
+    assert rendered == "http://cdn.example.com/javascript/lib/jquery.js"
 
 
 def test_add_path_from():
     template = """{% spurl base="http://www.google.com/original/?bla=bla&foo=bar" add_path_from=url %}"""
-    data = {'url': 'https://example.com/some/path/?foo=bar&bar=foo'}
+    data = {"url": "https://example.com/some/path/?foo=bar&bar=foo"}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com/original/some/path/?bla=bla&foo=bar'
+    assert rendered == "http://www.google.com/original/some/path/?bla=bla&foo=bar"
 
 
 def test_override_fragment():
     template = """{% spurl base="http://www.google.com/#somefragment" fragment="someotherfragment" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com/#someotherfragment'
+    assert rendered == "http://www.google.com/#someotherfragment"
 
 
 def test_fragment_from():
     template = """{% spurl base="http://www.google.com/?bla=bla&foo=bar#fragment" fragment_from=url %}"""
-    data = {'url': 'https://example.com/some/path/?foo=bar&bar=foo#newfragment'}
+    data = {"url": "https://example.com/some/path/?foo=bar&bar=foo#newfragment"}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com/?bla=bla&foo=bar#newfragment'
+    assert rendered == "http://www.google.com/?bla=bla&foo=bar#newfragment"
 
 
 def test_override_port():
     template = """{% spurl base="http://www.google.com:80" port="8080" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com:8080'
+    assert rendered == "http://www.google.com:8080"
 
 
 def test_port_from():
     template = """{% spurl base="http://www.google.com:8000/?bla=bla&foo=bar" port_from=url %}"""
-    data = {'url': 'https://example.com:8888/some/path/?foo=bar&bar=foo'}
+    data = {"url": "https://example.com:8888/some/path/?foo=bar&bar=foo"}
     rendered = render(template, data)
-    assert rendered == 'http://www.google.com:8888/?bla=bla&foo=bar'
+    assert rendered == "http://www.google.com:8888/?bla=bla&foo=bar"
 
 
 def test_build_complete_url():
-    template = """{% spurl scheme="http" host="www.google.com" path="/some/path/" port="8080" fragment="somefragment" %}"""
+    template = (
+        """{% spurl scheme="http" host="www.google.com" path="/some/path/" port="8080" fragment="somefragment" %}"""
+    )
     rendered = render(template)
-    assert rendered == 'http://www.google.com:8080/some/path/#somefragment'
+    assert rendered == "http://www.google.com:8080/some/path/#somefragment"
 
 
 def test_sensible_defaults():
     template = """{% spurl path="/some/path/" %}"""
     rendered = render(template)
-    assert rendered == '/some/path/'
+    assert rendered == "/some/path/"
 
     template = """{% spurl path="/some/path/" host="www.google.com" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com/some/path/'
+    assert rendered == "http://www.google.com/some/path/"
 
 
 def test_autoescaping():
-    template = """{% spurl base="http://www.google.com" query="a=b" add_query="c=d" add_query="e=f" fragment="frag" %}"""
+    template = (
+        """{% spurl base="http://www.google.com" query="a=b" add_query="c=d" add_query="e=f" fragment="frag" %}"""
+    )
     rendered = render(template, autoescape=True)  # Ordinarily, templates will be autoescaped by default
-    assert rendered == 'http://www.google.com?a=b&amp;c=d&amp;e=f#frag'
+    assert rendered == "http://www.google.com?a=b&amp;c=d&amp;e=f#frag"
 
 
 def test_disable_autoescaping_with_parameter():
     template = """{% spurl base="http://www.google.com" query="a=b" add_query="c=d" autoescape="False" %}"""
     rendered = render(template, autoescape=True)
-    assert rendered == 'http://www.google.com?a=b&c=d'
+    assert rendered == "http://www.google.com?a=b&c=d"
 
 
 def test_url_as_template_variable():
     template = """{% spurl base="http://www.google.com" as foo %}The url is {{ foo }}"""
     rendered = render(template)
-    assert rendered == 'The url is http://www.google.com'
+    assert rendered == "The url is http://www.google.com"
 
 
 def test_reversing_inside_spurl_tag():
@@ -491,24 +487,26 @@ def test_reversing_inside_spurl_tag():
     else:
         template = """{% spurl base="http://www.google.com/" path="{\% url 'test' %\}" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com/test/'
+    assert rendered == "http://www.google.com/test/"
 
     if django.VERSION < (1, 9):
-        template = """{% load url from future %}{% spurl base="http://www.google.com/" query="next={\% url 'test' %\}" %}"""
+        template = (
+            """{% load url from future %}{% spurl base="http://www.google.com/" query="next={\% url 'test' %\}" %}"""
+        )
     else:
         template = """{% spurl base="http://www.google.com/" query="next={\% url 'test' %\}" %}"""
     rendered = render(template)
-    assert rendered == 'http://www.google.com/?next=/test/'
+    assert rendered == "http://www.google.com/?next=/test/"
 
 
 def test_xzibit():
     template = """Yo dawg, the URL is: {% spurl base="http://www.google.com/" query="foo={\% spurl base='http://another.com' secure='true' %\}" %}"""
     rendered = render(template)
-    assert rendered == 'Yo dawg, the URL is: http://www.google.com/?foo=https://another.com'
+    assert rendered == "Yo dawg, the URL is: http://www.google.com/?foo=https://another.com"
 
 
 def test_auth_with_username_and_password():
     template = """{% spurl base=myurl auth=auth %}"""
-    data = {'myurl': 'https://www.google.com', 'auth': 'user:pass'}
+    data = {"myurl": "https://www.google.com", "auth": "user:pass"}
     rendered = render(template, data)
-    assert rendered == 'https://user:pass@www.google.com'
+    assert rendered == "https://user:pass@www.google.com"

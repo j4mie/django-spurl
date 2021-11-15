@@ -1,30 +1,19 @@
 import re
 
 import django
+import six
 from django.conf import settings
-from django.utils.html import escape
-from django.utils.encoding import smart_str
+from django.template import Library, Node, Origin, Template, TemplateSyntaxError
 from django.template.base import Lexer, Parser
-
-try:
-    from django.template import StringOrigin as Origin
-except ImportError:
-    from django.template import Origin
-
 from django.template.defaulttags import kwarg_re
-from django.template import Template, Library, Node, TemplateSyntaxError
-
-try:
-    from django.utils import six
-except ImportError:
-    import six
-
+from django.utils.encoding import smart_str
+from django.utils.html import escape
 from urlobject import URLObject
 from urlobject.query_string import QueryString
 
 register = Library()
 
-TRUE_RE = re.compile(r'^(true|on)$', flags=re.IGNORECASE)
+TRUE_RE = re.compile(r"^(true|on)$", flags=re.IGNORECASE)
 
 
 def convert_to_boolean(string_or_boolean):
@@ -35,7 +24,6 @@ def convert_to_boolean(string_or_boolean):
 
 
 class SpurlURLBuilder(object):
-
     def __init__(self, args, context, tags, filters):
         self.args = args
         self.context = context
@@ -58,8 +46,8 @@ class SpurlURLBuilder(object):
         return url
 
     def handle_argument(self, argument, value):
-        argument = smart_str(argument, 'ascii')
-        handler_name = 'handle_%s' % argument
+        argument = smart_str(argument, "ascii")
+        handler_name = "handle_%s" % argument
         handler = getattr(self, handler_name, None)
 
         if handler is not None:
@@ -72,11 +60,11 @@ class SpurlURLBuilder(object):
 
     def handle_auth(self, value):
         auth = self.prepare_value(value)
-        self.url = self.url.with_auth(*auth.split(':', 1))
+        self.url = self.url.with_auth(*auth.split(":", 1))
 
     def handle_secure(self, value):
         is_secure = convert_to_boolean(value)
-        scheme = 'https' if is_secure else 'http'
+        scheme = "https" if is_secure else "http"
         self.url = self.url.with_scheme(scheme)
 
     def handle_query(self, value):
@@ -111,8 +99,8 @@ class SpurlURLBuilder(object):
 
     def handle_remove_query_param(self, value):
         query_to_remove = self.prepare_value(value)
-        if '=' in query_to_remove:
-            k, v = query_to_remove.split('=', 1)
+        if "=" in query_to_remove:
+            k, v = query_to_remove.split("=", 1)
             self.url = self.url.del_query_param_value(k, v)
         else:
             self.url = self.url.del_query_param(query_to_remove)
@@ -129,9 +117,9 @@ class SpurlURLBuilder(object):
         current_query = self.url.query.dict
         for key, value in list(query_to_toggle.items()):
             if isinstance(value, six.string_types):
-                value = value.split(',')
+                value = value.split(",")
             first, second = value
-            if key in current_query and first in current_query[key]:
+            if key in current_query and first == current_query[key]:
                 self.url = self.url.set_query_param(key, second)
             else:
                 self.url = self.url.set_query_param(key, first)
@@ -166,7 +154,7 @@ class SpurlURLBuilder(object):
     def handle_add_path_from(self, value):
         url = URLObject(value)
         path_to_add = url.path
-        if path_to_add.startswith('/'):
+        if path_to_add.startswith("/"):
             path_to_add = path_to_add[1:]
         self.url = self.url.add_path(path_to_add)
 
@@ -190,7 +178,7 @@ class SpurlURLBuilder(object):
 
     def set_sensible_defaults(self):
         if self.url.hostname and not self.url.scheme:
-            self.url = self.url.with_scheme('http')
+            self.url = self.url.with_scheme("http")
 
     def prepare_value(self, value):
         """Prepare a value by unescaping embedded template tags
@@ -202,7 +190,7 @@ class SpurlURLBuilder(object):
     def unescape_tags(self, template_string):
         """Spurl allows the use of templatetags inside templatetags, if
         the inner templatetags are escaped - {\% and %\}"""
-        return template_string.replace('{\%', '{%').replace('%\}', '%}')
+        return template_string.replace("{\%", "{%").replace("%\}", "%}")
 
     def compile_string(self, template_string, origin, template_debug=False):
         """Re-implementation of django.template.base.compile_string
@@ -211,9 +199,11 @@ class SpurlURLBuilder(object):
         if template_debug is True:
             if django.VERSION < (1, 9):
                 from django.template.debug import DebugLexer, DebugParser
+
                 lexer_class, parser_class = DebugLexer, DebugParser
             else:
                 from django.template.base import DebugLexer
+
                 lexer_class, parser_class = DebugLexer, Parser
         else:
             lexer_class, parser_class = Lexer, Parser
@@ -235,17 +225,16 @@ class SpurlURLBuilder(object):
         original_autoescape = self.context.autoescape
         self.context.autoescape = False
 
-        template = Template('')
+        template = Template("")
         template_debug = getattr(
-            settings, 'TEMPLATE_DEBUG', template.engine.debug if hasattr(
-                template, 'engine') else False)
+            settings, "TEMPLATE_DEBUG", template.engine.debug if hasattr(template, "engine") else False
+        )
         if template_debug is True:
             origin = Origin(template_string)
         else:
             origin = None
 
-        template.nodelist = self.compile_string(
-            template_string, origin, template_debug)
+        template.nodelist = self.compile_string(template_string, origin, template_debug)
 
         rendered = template.render(self.context)
         self.context.autoescape = original_autoescape
@@ -253,7 +242,6 @@ class SpurlURLBuilder(object):
 
 
 class SpurlNode(Node):
-
     def __init__(self, args, tags, filters, asvar=None):
         self.args = args
         self.asvar = asvar
@@ -266,7 +254,7 @@ class SpurlNode(Node):
 
         if self.asvar:
             context[self.asvar] = url
-            return ''
+            return ""
 
         return url
 
@@ -281,7 +269,7 @@ def spurl(parser, token):
     asvar = None
     bits = bits[1:]
 
-    if len(bits) >= 2 and bits[-2] == 'as':
+    if len(bits) >= 2 and bits[-2] == "as":
         asvar = bits[-1]
         bits = bits[:-2]
 
