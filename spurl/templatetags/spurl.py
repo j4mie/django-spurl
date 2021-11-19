@@ -1,7 +1,6 @@
 import re
 
 import django
-import six
 from django.conf import settings
 from django.template import Library, Node, Origin, Template, TemplateSyntaxError
 from django.template.base import Lexer, Parser
@@ -19,11 +18,11 @@ TRUE_RE = re.compile(r"^(true|on)$", flags=re.IGNORECASE)
 def convert_to_boolean(string_or_boolean):
     if isinstance(string_or_boolean, bool):
         return string_or_boolean
-    if isinstance(string_or_boolean, six.string_types):
+    if isinstance(string_or_boolean, str):
         return bool(TRUE_RE.match(string_or_boolean))
 
 
-class SpurlURLBuilder(object):
+class SpurlURLBuilder:
     def __init__(self, args, context, tags, filters):
         self.args = args
         self.context = context
@@ -38,7 +37,7 @@ class SpurlURLBuilder(object):
 
         self.set_sensible_defaults()
 
-        url = six.text_type(self.url)
+        url = str(self.url)
 
         if self.autoescape:
             url = escape(url)
@@ -79,7 +78,7 @@ class SpurlURLBuilder(object):
 
     def handle_add_query(self, value):
         query_to_add = self.prepare_value(value)
-        if isinstance(query_to_add, six.string_types):
+        if isinstance(query_to_add, str):
             query_to_add = QueryString(query_to_add).dict
         self.url = self.url.add_query_params(**query_to_add)
 
@@ -89,7 +88,7 @@ class SpurlURLBuilder(object):
 
     def handle_set_query(self, value):
         query_to_set = self.prepare_value(value)
-        if isinstance(query_to_set, six.string_types):
+        if isinstance(query_to_set, str):
             query_to_set = QueryString(query_to_set).dict
         self.url = self.url.set_query_params(**query_to_set)
 
@@ -112,11 +111,11 @@ class SpurlURLBuilder(object):
 
     def handle_toggle_query(self, value):
         query_to_toggle = self.prepare_value(value)
-        if isinstance(query_to_toggle, six.string_types):
+        if isinstance(query_to_toggle, str):
             query_to_toggle = QueryString(query_to_toggle).dict
         current_query = self.url.query.dict
         for key, value in list(query_to_toggle.items()):
-            if isinstance(value, six.string_types):
+            if isinstance(value, str):
                 value = value.split(",")
             first, second = value
             if key in current_query and first == current_query[key]:
@@ -183,14 +182,14 @@ class SpurlURLBuilder(object):
     def prepare_value(self, value):
         """Prepare a value by unescaping embedded template tags
         and rendering through Django's template system"""
-        if isinstance(value, six.string_types):
+        if isinstance(value, str):
             value = self.render_template(self.unescape_tags(value))
         return value
 
     def unescape_tags(self, template_string):
-        """Spurl allows the use of templatetags inside templatetags, if
+        r"""Spurl allows the use of templatetags inside templatetags, if
         the inner templatetags are escaped - {\% and %\}"""
-        return template_string.replace("{\%", "{%").replace("%\}", "%}")
+        return template_string.replace(r"{\%", "{%").replace(r"%\}", "%}")
 
     def compile_string(self, template_string, origin, template_debug=False):
         """Re-implementation of django.template.base.compile_string

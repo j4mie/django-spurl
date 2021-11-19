@@ -481,26 +481,26 @@ def test_url_as_template_variable():
 
 
 def test_reversing_inside_spurl_tag():
-    template = """{% spurl base="http://www.google.com/" path="{\% url 'test' %\}" %}"""
+    template = r"""{% spurl base="http://www.google.com/" path="{\% url 'test' %\}" %}"""
     if django.VERSION < (1, 9):
-        template = """{% load url from future %}{% spurl base="http://www.google.com/" path="{\% url 'test' %\}" %}"""
+        template = r"""{% load url from future %}{% spurl base="http://www.google.com/" path="{\% url 'test' %\}" %}"""
     else:
-        template = """{% spurl base="http://www.google.com/" path="{\% url 'test' %\}" %}"""
+        template = r"""{% spurl base="http://www.google.com/" path="{\% url 'test' %\}" %}"""
     rendered = render(template)
     assert rendered == "http://www.google.com/test/"
 
     if django.VERSION < (1, 9):
         template = (
-            """{% load url from future %}{% spurl base="http://www.google.com/" query="next={\% url 'test' %\}" %}"""
+            r"""{% load url from future %}{% spurl base="http://www.google.com/" query="next={\% url 'test' %\}" %}"""
         )
     else:
-        template = """{% spurl base="http://www.google.com/" query="next={\% url 'test' %\}" %}"""
+        template = r"""{% spurl base="http://www.google.com/" query="next={\% url 'test' %\}" %}"""
     rendered = render(template)
     assert rendered == "http://www.google.com/?next=/test/"
 
 
 def test_xzibit():
-    template = """Yo dawg, the URL is: {% spurl base="http://www.google.com/" query="foo={\% spurl base='http://another.com' secure='true' %\}" %}"""
+    template = r"""Yo dawg, the URL is: {% spurl base="http://www.google.com/" query="foo={\% spurl base='http://another.com' secure='true' %\}" %}"""
     rendered = render(template)
     assert rendered == "Yo dawg, the URL is: http://www.google.com/?foo=https://another.com"
 
