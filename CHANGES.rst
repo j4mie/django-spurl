@@ -1,6 +1,16 @@
 Changes
 -------
 
+0.6.9 (2026-11-09)
+~~~~~~~~~~~~~~~~~~
+
+* Drop support for Python < 3.11 and Django < 5.2.
+* Add support for Python 3.11 – 3.15 and Django 5.2, 6.0 and 6.1.
+* Remove deprecated code and the unused ``six`` dependency.
+* Migrate packaging from ``setup.py`` / ``setup.cfg`` to ``pyproject.toml``.
+* Switch test suite from ``nose`` to ``pytest``.
+* Replace Travis CI with GitHub Actions.
+
 0.6.8 (2021-11-15)
 ~~~~~~~~~~~~~~~~~~
 
@@ -15,6 +25,7 @@ Changes
 ~~~~~~~~~~~~~~~~~~
 
 * Added support for an except clause to remove all but specifed query vars.
+* Added support for removing a single value with ``remove_query_param="key=value"`` (#7, thanks Ed Stafford).
 
 0.6.5 (2018-05-09)
 ~~~~~~~~~~~~~~~~~~
