@@ -22,20 +22,17 @@ Super URLs for Django
      |_(---'-| >-'-| |       '-'
             /_/     \_\
 
-.. image:: https://img.shields.io/pypi/v/django-spurl.svg
+.. image:: https://badge.fury.io/py/django-spurl.svg
+    :target: https://badge.fury.io/py/django-spurl
+
+.. image:: https://img.shields.io/pypi/pyversions/django-spurl.svg
     :target: https://pypi.python.org/pypi/django-spurl/
 
-.. image:: https://img.shields.io/pypi/dm/django-spurl.svg
+.. image:: https://img.shields.io/pypi/djversions/django-spurl.svg
     :target: https://pypi.python.org/pypi/django-spurl/
 
-.. image:: https://img.shields.io/github/license/j4mie/django-spurl.svg
-    :target: https://pypi.python.org/pypi/django-spurl/
-
-.. image:: https://img.shields.io/travis/j4mie/django-spurl.svg
-    :target: https://travis-ci.com/github/j4mie/django-spurl/
-
-.. image:: https://coveralls.io/repos/github/j4mie/django-spurl/badge.svg?branch=develop
-    :target: https://coveralls.io/github/j4mie/django-spurl?branch=develop
+.. image:: https://github.com/j4mie/django-spurl/actions/workflows/test.yml/badge.svg
+    :target: https://github.com/j4mie/django-spurl/actions/workflows/test.yml
 
 **Spurl** is a Django template library for manipulating URLs. It's built
 on top of Zachary Voase's excellent
@@ -542,10 +539,19 @@ commit, push, and open a pull request.
 How to run the tests
 ~~~~~~~~~~~~~~~~~~~~
 
-Spurl is tested with `nose <http://nose.readthedocs.org>`__. Clone the
-repository, then run ``pip install -r requirements.txt`` to install nose
-and Django into your virtualenv. Then, simply type ``nosetests`` to find
-and run all the tests.
+Spurl is tested with `pytest <https://docs.pytest.org>`__. Clone the
+repository, then run the tests with `uv <https://docs.astral.sh/uv/>`__:
+
+.. code:: shell
+
+    uv run pytest
+
+To run the full matrix of supported Python and Django versions, use
+`tox <https://tox.wiki>`__:
+
+.. code:: shell
+
+    uvx --with tox-uv tox
 
 (Un)license
 -----------

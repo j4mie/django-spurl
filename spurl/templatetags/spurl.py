@@ -1,12 +1,18 @@
 import re
 
-import django
 from django.conf import settings
-from django.template import Library, Node, Origin, Template, TemplateSyntaxError
-from django.template.base import Lexer, Parser
+from django.template import Library
+from django.template import Node
+from django.template import Origin
+from django.template import Template
+from django.template import TemplateSyntaxError
+from django.template.base import DebugLexer
+from django.template.base import Lexer
+from django.template.base import Parser
 from django.template.defaulttags import kwarg_re
 from django.utils.encoding import smart_str
 from django.utils.html import escape
+
 from urlobject import URLObject
 from urlobject.query_string import QueryString
 
@@ -20,6 +26,7 @@ def convert_to_boolean(string_or_boolean):
         return string_or_boolean
     if isinstance(string_or_boolean, str):
         return bool(TRUE_RE.match(string_or_boolean))
+    return None
 
 
 class SpurlURLBuilder:
@@ -46,7 +53,7 @@ class SpurlURLBuilder:
 
     def handle_argument(self, argument, value):
         argument = smart_str(argument, "ascii")
-        handler_name = "handle_%s" % argument
+        handler_name = f"handle_{argument}"
         handler = getattr(self, handler_name, None)
 
         if handler is not None:
@@ -106,7 +113,9 @@ class SpurlURLBuilder:
 
     def handle_remove_query_params_except(self, value):
         params_to_keep = self.prepare_value(value).split(" ")
-        params_to_remove = [pair[0] for pair in self.url.query_list if pair[0] not in params_to_keep]
+        params_to_remove = [
+            pair[0] for pair in self.url.query_list if pair[0] not in params_to_keep
+        ]
         self.url = self.url.with_query(self.url.query.del_params(params_to_remove))
 
     def handle_toggle_query(self, value):
@@ -114,10 +123,8 @@ class SpurlURLBuilder:
         if isinstance(query_to_toggle, str):
             query_to_toggle = QueryString(query_to_toggle).dict
         current_query = self.url.query.dict
-        for key, value in list(query_to_toggle.items()):
-            if isinstance(value, str):
-                value = value.split(",")
-            first, second = value
+        for key, values in list(query_to_toggle.items()):
+            first, second = values.split(",") if isinstance(values, str) else values
             if key in current_query and first == current_query[key]:
                 self.url = self.url.set_query_param(key, second)
             else:
@@ -191,25 +198,15 @@ class SpurlURLBuilder:
         the inner templatetags are escaped - {\% and %\}"""
         return template_string.replace(r"{\%", "{%").replace(r"%\}", "%}")
 
-    def compile_string(self, template_string, origin, template_debug=False):
+    def compile_string(self, template_string, origin, *, template_debug=False):
         """Re-implementation of django.template.base.compile_string
         that takes into account the tags and filter of the parser
         that rendered the parent template"""
         if template_debug is True:
-            if django.VERSION < (1, 9):
-                from django.template.debug import DebugLexer, DebugParser
-
-                lexer_class, parser_class = DebugLexer, DebugParser
-            else:
-                from django.template.base import DebugLexer
-
-                lexer_class, parser_class = DebugLexer, Parser
+            lexer_class, parser_class = DebugLexer, Parser
         else:
             lexer_class, parser_class = Lexer, Parser
-        if django.VERSION < (1, 9):
-            lexer = lexer_class(template_string, origin)
-        else:
-            lexer = lexer_class(template_string)
+        lexer = lexer_class(template_string)
         parser = parser_class(lexer.tokenize())
 
         # Attach the tags and filters from the parent parser
@@ -226,14 +223,17 @@ class SpurlURLBuilder:
 
         template = Template("")
         template_debug = getattr(
-            settings, "TEMPLATE_DEBUG", template.engine.debug if hasattr(template, "engine") else False
+            settings,
+            "TEMPLATE_DEBUG",
+            template.engine.debug if hasattr(template, "engine") else False,
         )
-        if template_debug is True:
-            origin = Origin(template_string)
-        else:
-            origin = None
+        origin = Origin(template_string) if template_debug is True else None
 
-        template.nodelist = self.compile_string(template_string, origin, template_debug)
+        template.nodelist = self.compile_string(
+            template_string,
+            origin,
+            template_debug=template_debug,
+        )
 
         rendered = template.render(self.context)
         self.context.autoescape = original_autoescape
@@ -260,21 +260,22 @@ class SpurlNode(Node):
 
 @register.tag
 def spurl(parser, token):
-    bits = token.split_contents()
-    if len(bits) < 2:
-        raise TemplateSyntaxError("'spurl' takes at least one argument")
+    _, *bits = token.split_contents()
+    if not bits:
+        msg = "'spurl' takes at least one argument"
+        raise TemplateSyntaxError(msg)
 
     args = []
     asvar = None
-    bits = bits[1:]
 
-    if len(bits) >= 2 and bits[-2] == "as":
+    if len(bits) > 1 and bits[-2] == "as":
         asvar = bits[-1]
         bits = bits[:-2]
 
     for bit in bits:
         name, value = kwarg_re.match(bit).groups()
         if not (name and value):
-            raise TemplateSyntaxError("Malformed arguments to spurl tag")
+            msg = "Malformed arguments to spurl tag"
+            raise TemplateSyntaxError(msg)
         args.append((name, parser.compile_filter(value)))
     return SpurlNode(args, parser.tags, parser.filters, asvar)

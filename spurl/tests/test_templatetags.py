@@ -1,35 +1,13 @@
-import django
-import nose
-from django.conf import settings
-from django.http import HttpResponse
-from django.template import Context, Template, TemplateSyntaxError
-from django.urls import path
+from django.template import Context
+from django.template import Template
+from django.template import TemplateSyntaxError
+
+import pytest
 
 from spurl.templatetags.spurl import convert_to_boolean
 
-# This file acts as a urlconf
-urlpatterns = [path("test/", lambda r: HttpResponse("ok"), name="test")]
 
-# bootstrap django
-configure_kwargs = {
-    "ROOT_URLCONF": "spurl.tests",
-    "INSTALLED_APPS": ["spurl.tests"],
-}
-configure_kwargs["TEMPLATES"] = [
-    {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "OPTIONS": {
-            "builtins": ["spurl.templatetags.spurl"],
-        },
-    }
-]
-settings.configure(**configure_kwargs)
-
-if django.VERSION >= (1, 7):
-    django.setup()
-
-
-def render(template_string, dictionary=None, autoescape=False):
+def render(template_string, dictionary=None, *, autoescape=False):
     """
     Render a template from the supplied string, with optional context data.
 
@@ -43,8 +21,8 @@ def render(template_string, dictionary=None, autoescape=False):
 
 
 def test_convert_argument_value_to_boolean():
-    assert convert_to_boolean(True) is True
-    assert convert_to_boolean(False) is False
+    assert convert_to_boolean(True) is True  # noqa: FBT003
+    assert convert_to_boolean(False) is False  # noqa: FBT003
     assert convert_to_boolean("True") is True
     assert convert_to_boolean("true") is True
     assert convert_to_boolean("On") is True
@@ -56,14 +34,14 @@ def test_convert_argument_value_to_boolean():
     assert convert_to_boolean("randomstring") is False
 
 
-@nose.tools.raises(TemplateSyntaxError)
 def test_noargs_raises_exception():
-    render("""{% spurl %}""")
+    with pytest.raises(TemplateSyntaxError):
+        render("""{% spurl %}""")
 
 
-@nose.tools.raises(TemplateSyntaxError)
 def test_malformed_args_raises_exception():
-    render("""{% spurl something %}""")
+    with pytest.raises(TemplateSyntaxError):
+        render("""{% spurl something %}""")
 
 
 def test_passthrough():
@@ -127,11 +105,14 @@ def test_set_query_from_dict_with_variable():
     rendered = render(template, data)
     if "http://www.google.com?" not in rendered:
         raise AssertionError
-    assert "foo=bar" in rendered and "bar=foo" in rendered
+    assert "foo=bar" in rendered
+    assert "bar=foo" in rendered
 
 
 def test_set_query_from_template_variables():
-    template = """{% spurl base=myurl query="foo={{ first_var }}&bar={{ second_var }}" %}"""
+    template = (
+        """{% spurl base=myurl query="foo={{ first_var }}&bar={{ second_var }}" %}"""
+    )
     data = {
         "myurl": "http://www.google.com",
         "first_var": "bar",
@@ -140,7 +121,8 @@ def test_set_query_from_template_variables():
     rendered = render(template, data)
     if "http://www.google.com?" not in rendered:
         raise AssertionError
-    assert "foo=bar" in rendered and "bar=foo" in rendered
+    assert "foo=bar" in rendered
+    assert "bar=foo" in rendered
 
 
 def test_set_query_from_template_variables_not_double_escaped():
@@ -151,7 +133,7 @@ def test_set_query_from_template_variables_not_double_escaped():
 
 
 def test_set_query_removes_existing_query():
-    template = """{% spurl base="http://www.google.com?something=somethingelse" query="foo=bar&bar=foo" %}"""
+    template = """{% spurl base="http://www.google.com?something=somethingelse" query="foo=bar&bar=foo" %}"""  # noqa: E501
     rendered = render(template)
     assert rendered == "http://www.google.com?foo=bar&bar=foo"
 
@@ -164,11 +146,12 @@ def test_query_from():
 
 
 def test_add_to_query_from_string():
-    template = """{% spurl base="http://www.google.com?something=somethingelse" add_query="foo=bar&bar=foo" %}"""
+    template = """{% spurl base="http://www.google.com?something=somethingelse" add_query="foo=bar&bar=foo" %}"""  # noqa: E501
     rendered = render(template)
     if "http://www.google.com?something=somethingelse" not in rendered:
         raise AssertionError
-    assert "&foo=bar" in rendered and "&bar=foo" in rendered
+    assert "&foo=bar" in rendered
+    assert "&bar=foo" in rendered
 
 
 def test_add_to_query_from_dict_with_variable():
@@ -180,37 +163,40 @@ def test_add_to_query_from_dict_with_variable():
     rendered = render(template, data)
     if "http://www.google.com?something=somethingelse" not in rendered:
         raise AssertionError
-    assert "&foo=bar" in rendered and "&bar=foo" in rendered
+    assert "&foo=bar" in rendered
+    assert "&bar=foo" in rendered
 
 
 def test_multiple_add_query():
-    template = """{% spurl base="http://www.google.com/" add_query="foo=bar" add_query="bar=baz" %}"""
+    template = """{% spurl base="http://www.google.com/" add_query="foo=bar" add_query="bar=baz" %}"""  # noqa: E501
     rendered = render(template)
     assert rendered == "http://www.google.com/?foo=bar&bar=baz"
 
 
 def test_add_to_query_from_template_variables():
-    template = """{% spurl base="http://www.google.com/?foo=bar" add_query="bar={{ var }}" %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar" add_query="bar={{ var }}" %}"""  # noqa: E501
     data = {"var": "baz"}
     rendered = render(template, data)
     assert rendered == "http://www.google.com/?foo=bar&bar=baz"
 
 
 def test_add_query_from():
-    template = """{% spurl base="http://www.google.com/?bla=bla&flub=flub" add_query_from=url %}"""
+    template = """{% spurl base="http://www.google.com/?bla=bla&flub=flub" add_query_from=url %}"""  # noqa: E501
     data = {"url": "http://example.com/some/path/?foo=bar&bar=foo"}
     rendered = render(template, data)
     if "http://www.google.com/?bla=bla&flub=flub" not in rendered:
         raise AssertionError
-    assert "&foo=bar" in rendered and "&bar=foo" in rendered
+    assert "&foo=bar" in rendered
+    assert "&bar=foo" in rendered
 
 
 def test_set_query_param_from_string():
-    template = """{% spurl base="http://www.google.com?something=somethingelse" set_query="something=foo&somethingelse=bar" %}"""
+    template = """{% spurl base="http://www.google.com?something=somethingelse" set_query="something=foo&somethingelse=bar" %}"""  # noqa: E501
     rendered = render(template)
     if "http://www.google.com?" not in rendered:
         raise AssertionError
-    assert "somethingelse=bar" in rendered and "something=foo" in rendered
+    assert "somethingelse=bar" in rendered
+    assert "something=foo" in rendered
 
 
 def test_set_query_param_from_dict_with_variable():
@@ -222,129 +208,130 @@ def test_set_query_param_from_dict_with_variable():
     rendered = render(template, data)
     if "http://www.google.com?" not in rendered:
         raise AssertionError
-    assert "somethingelse=bar" in rendered and "something=foo" in rendered
+    assert "somethingelse=bar" in rendered
+    assert "something=foo" in rendered
 
 
 def test_toggle_query():
-    template = """{% spurl base="http://www.google.com/?foo=bar" toggle_query="bar=first,second" %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar" toggle_query="bar=first,second" %}"""  # noqa: E501
     rendered = render(template)
     assert rendered == "http://www.google.com/?foo=bar&bar=first"
 
-    template = """{% spurl base="http://www.google.com/?foo=bar&bar=first" toggle_query="bar=first,second" %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=first" toggle_query="bar=first,second" %}"""  # noqa: E501
     rendered = render(template)
     assert rendered == "http://www.google.com/?foo=bar&bar=second"
 
-    template = """{% spurl base="http://www.google.com/?foo=bar&bar=second" toggle_query="bar=first,second" %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=second" toggle_query="bar=first,second" %}"""  # noqa: E501
     rendered = render(template)
     assert rendered == "http://www.google.com/?foo=bar&bar=first"
 
-    template = """{% spurl base="http://www.google.com/?foo=bar&bar=first" toggle_query=to_toggle %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=first" toggle_query=to_toggle %}"""  # noqa: E501
     data = {"to_toggle": {"bar": ("first", "second")}}
     rendered = render(template, data)
     assert rendered == "http://www.google.com/?foo=bar&bar=second"
 
-    template = """{% spurl base="http://www.google.com/?foo=bar&bar=second" toggle_query=to_toggle %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=second" toggle_query=to_toggle %}"""  # noqa: E501
     data = {"to_toggle": {"bar": ("first", "second")}}
     rendered = render(template, data)
     assert rendered == "http://www.google.com/?foo=bar&bar=first"
 
-    template = """{% spurl base="http://www.google.com/?foo=bar&bar=javascript" toggle_query=to_toggle %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=javascript" toggle_query=to_toggle %}"""  # noqa: E501
     data = {"to_toggle": {"bar": ("java", "javascript")}}
     rendered = render(template, data)
     assert rendered == "http://www.google.com/?foo=bar&bar=java"
 
 
 def test_multiple_set_query():
-    template = """{% spurl base="http://www.google.com/?foo=test" set_query="foo=bar" set_query="bar=baz" %}"""
+    template = """{% spurl base="http://www.google.com/?foo=test" set_query="foo=bar" set_query="bar=baz" %}"""  # noqa: E501
     rendered = render(template)
     assert rendered == "http://www.google.com/?foo=bar&bar=baz"
 
 
 def test_set_query_param_from_template_variables():
-    template = """{% spurl base="http://www.google.com/?foo=bar" set_query="foo={{ var }}" %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar" set_query="foo={{ var }}" %}"""  # noqa: E501
     data = {"var": "baz"}
     rendered = render(template, data)
     assert rendered == "http://www.google.com/?foo=baz"
 
 
 def test_empty_parameters_preserved():
-    template = """{% spurl base="http://www.google.com/?foo=bar" set_query="bar={{ emptyvar }}" %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar" set_query="bar={{ emptyvar }}" %}"""  # noqa: E501
     data = {}  # does not contain and "emptyvar" key
     rendered = render(template, data)
     assert rendered == "http://www.google.com/?foo=bar&bar="
 
 
 def test_none_values_are_removed_when_setting_query():
-    template = """{% spurl base="http://www.google.com/?foo=bar" set_query="bar={{ nonevar|default_if_none:'' }}" %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar" set_query="bar={{ nonevar|default_if_none:'' }}" %}"""  # noqa: E501
     data = {"nonevar": None}
     rendered = render(template, data)
     assert rendered == "http://www.google.com/?foo=bar&bar="
 
 
 def test_set_query_from():
-    template = """{% spurl base="http://www.google.com?bla=bla&foo=something" set_query_from=url %}"""
+    template = """{% spurl base="http://www.google.com?bla=bla&foo=something" set_query_from=url %}"""  # noqa: E501
     data = {"url": "http://example.com/some/path?foo=bar&bar=foo"}
     rendered = render(template, data)
     if "http://www.google.com?" not in rendered:
         raise AssertionError
-    assert "bla=bla" in rendered and "foo=bar" in rendered and "bar=foo" in rendered
+    assert "bla=bla" in rendered
+    assert "foo=bar" in rendered
+    assert "bar=foo" in rendered
 
 
 def test_none_values_are_removed_when_adding_query():
-    template = """{% spurl base="http://www.google.com/?foo=bar" add_query="bar={{ nonevar|default_if_none:'' }}" %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar" add_query="bar={{ nonevar|default_if_none:'' }}" %}"""  # noqa: E501
     data = {"nonevar": None}
     rendered = render(template, data)
     assert rendered == "http://www.google.com/?foo=bar&bar="
 
 
 def test_remove_from_query():
-    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz" remove_query_param="foo" %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz" remove_query_param="foo" %}"""  # noqa: E501
     rendered = render(template)
     assert rendered == "http://www.google.com/?bar=baz"
 
 
 def test_remove_except_from_query():
-    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz&baz=foo" remove_query_params_except="baz" %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz&baz=foo" remove_query_params_except="baz" %}"""  # noqa: E501
     rendered = render(template)
     assert rendered == "http://www.google.com/?baz=foo"
 
 
 def test_remove_except_from_query_with_template_variable():
-    template = (
-        """{% spurl base="http://www.google.com/?foo=bar&bar=baz&baz=foo" remove_query_params_except="{{ baz }}" %}"""
-    )
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz&baz=foo" remove_query_params_except="{{ baz }}" %}"""  # noqa: E501
     data = {"baz": "baz"}
     rendered = render(template, data)
     assert rendered == "http://www.google.com/?baz=foo"
 
 
 def test_remove_from_query_with_value():
-    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz&bar=foo" remove_query_param="bar=foo" %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz&bar=foo" remove_query_param="bar=foo" %}"""  # noqa: E501
     rendered = render(template)
     assert rendered == "http://www.google.com/?foo=bar&bar=baz"
 
 
 def test_remove_multiple_from_query_with_value():
-    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz&bar=foo&foo=baz" remove_query_param="bar=foo" remove_query_param="foo=baz" %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz&bar=foo&foo=baz" remove_query_param="bar=foo" remove_query_param="foo=baz" %}"""  # noqa: E501
     rendered = render(template)
     assert rendered == "http://www.google.com/?foo=bar&bar=baz"
 
 
 def test_remove_multiple_params():
-    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz" remove_query_param="foo" remove_query_param="bar" %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz" remove_query_param="foo" remove_query_param="bar" %}"""  # noqa: E501
     rendered = render(template)
     assert rendered == "http://www.google.com/"
 
 
 def test_remove_from_query_with_value_from_template_variable():
-    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz&bar=foo&foo=baz" remove_query_param="{{ foo }}={{ baz }}" remove_query_param="{{ bar }}={{ foo }}" %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz&bar=foo&foo=baz" remove_query_param="{{ foo }}={{ baz }}" remove_query_param="{{ bar }}={{ foo }}" %}"""  # noqa: E501
     data = {"foo": "foo", "bar": "bar", "baz": "baz"}
     rendered = render(template, data)
     assert rendered == "http://www.google.com/?foo=bar&bar=baz"
 
 
 def test_remove_param_from_template_variable():
-    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz" remove_query_param="{{ foo }}" remove_query_param="{{ bar }}" %}"""
+    template = """{% spurl base="http://www.google.com/?foo=bar&bar=baz" remove_query_param="{{ foo }}" remove_query_param="{{ bar }}" %}"""  # noqa: E501
     data = {"foo": "foo", "bar": "bar"}
     rendered = render(template, data)
     assert rendered == "http://www.google.com/"
@@ -357,73 +344,81 @@ def test_override_scheme():
 
 
 def test_scheme_from():
-    template = """{% spurl base="http://www.google.com/?bla=bla&foo=bar" scheme_from=url %}"""
+    template = (
+        """{% spurl base="http://www.google.com/?bla=bla&foo=bar" scheme_from=url %}"""
+    )
     data = {"url": "https://example.com/some/path/?foo=bar&bar=foo"}
     rendered = render(template, data)
     assert rendered == "https://www.google.com/?bla=bla&foo=bar"
 
 
 def test_override_host():
-    template = """{% spurl base="http://www.google.com/some/path/" host="www.example.com" %}"""
+    template = (
+        """{% spurl base="http://www.google.com/some/path/" host="www.example.com" %}"""
+    )
     rendered = render(template)
     assert rendered == "http://www.example.com/some/path/"
 
 
 def test_host_from():
-    template = """{% spurl base="http://www.google.com/?bla=bla&foo=bar" host_from=url %}"""
+    template = (
+        """{% spurl base="http://www.google.com/?bla=bla&foo=bar" host_from=url %}"""
+    )
     data = {"url": "https://example.com/some/path/?foo=bar&bar=foo"}
     rendered = render(template, data)
     assert rendered == "http://example.com/?bla=bla&foo=bar"
 
 
 def test_override_path():
-    template = """{% spurl base="http://www.google.com/some/path/" path="/another/different/one/" %}"""
+    template = """{% spurl base="http://www.google.com/some/path/" path="/another/different/one/" %}"""  # noqa: E501
     rendered = render(template)
     assert rendered == "http://www.google.com/another/different/one/"
 
 
 def test_path_from():
-    template = """{% spurl base="http://www.google.com/original/?bla=bla&foo=bar" path_from=url %}"""
+    template = """{% spurl base="http://www.google.com/original/?bla=bla&foo=bar" path_from=url %}"""  # noqa: E501
     data = {"url": "https://example.com/some/path/?foo=bar&bar=foo"}
     rendered = render(template, data)
     assert rendered == "http://www.google.com/some/path/?bla=bla&foo=bar"
 
 
 def test_add_path():
-    template = """{% spurl base="http://www.google.com/some/path/" add_path="another/" %}"""
+    template = (
+        """{% spurl base="http://www.google.com/some/path/" add_path="another/" %}"""
+    )
     rendered = render(template)
     assert rendered == "http://www.google.com/some/path/another/"
 
 
 def test_multiple_add_path():
-    template = """{% spurl base="http://www.google.com/" add_path="some" add_path="another/" %}"""
+    template = """{% spurl base="http://www.google.com/" add_path="some" add_path="another/" %}"""  # noqa: E501
     rendered = render(template)
     assert rendered == "http://www.google.com/some/another/"
 
 
 def test_multiple_add_path_from_template_variables():
     """Usage example for building media urls"""
-    template = """{% spurl base=STATIC_URL add_path="javascript" add_path="lib" add_path="jquery.js" %}"""
+    template = """{% spurl base=STATIC_URL add_path="javascript" add_path="lib" add_path="jquery.js" %}"""  # noqa: E501
     data = {"STATIC_URL": "http://cdn.example.com"}
     rendered = render(template, data)
     assert rendered == "http://cdn.example.com/javascript/lib/jquery.js"
 
 
 def test_add_path_from():
-    template = """{% spurl base="http://www.google.com/original/?bla=bla&foo=bar" add_path_from=url %}"""
+    template = """{% spurl base="http://www.google.com/original/?bla=bla&foo=bar" add_path_from=url %}"""  # noqa: E501
     data = {"url": "https://example.com/some/path/?foo=bar&bar=foo"}
     rendered = render(template, data)
     assert rendered == "http://www.google.com/original/some/path/?bla=bla&foo=bar"
 
 
 def test_override_fragment():
-    template = """{% spurl base="http://www.google.com/#somefragment" fragment="someotherfragment" %}"""
+    template = """{% spurl base="http://www.google.com/#somefragment" fragment="someotherfragment" %}"""  # noqa: E501
     rendered = render(template)
     assert rendered == "http://www.google.com/#someotherfragment"
 
 
 def test_fragment_from():
-    template = """{% spurl base="http://www.google.com/?bla=bla&foo=bar#fragment" fragment_from=url %}"""
+    template = """{% spurl base="http://www.google.com/?bla=bla&foo=bar#fragment" fragment_from=url %}"""  # noqa: E501
     data = {"url": "https://example.com/some/path/?foo=bar&bar=foo#newfragment"}
     rendered = render(template, data)
     assert rendered == "http://www.google.com/?bla=bla&foo=bar#newfragment"
@@ -436,16 +431,14 @@ def test_override_port():
 
 
 def test_port_from():
-    template = """{% spurl base="http://www.google.com:8000/?bla=bla&foo=bar" port_from=url %}"""
+    template = """{% spurl base="http://www.google.com:8000/?bla=bla&foo=bar" port_from=url %}"""  # noqa: E501
     data = {"url": "https://example.com:8888/some/path/?foo=bar&bar=foo"}
     rendered = render(template, data)
     assert rendered == "http://www.google.com:8888/?bla=bla&foo=bar"
 
 
 def test_build_complete_url():
-    template = (
-        """{% spurl scheme="http" host="www.google.com" path="/some/path/" port="8080" fragment="somefragment" %}"""
-    )
+    template = """{% spurl scheme="http" host="www.google.com" path="/some/path/" port="8080" fragment="somefragment" %}"""  # noqa: E501
     rendered = render(template)
     assert rendered == "http://www.google.com:8080/some/path/#somefragment"
 
@@ -461,15 +454,16 @@ def test_sensible_defaults():
 
 
 def test_autoescaping():
-    template = (
-        """{% spurl base="http://www.google.com" query="a=b" add_query="c=d" add_query="e=f" fragment="frag" %}"""
-    )
-    rendered = render(template, autoescape=True)  # Ordinarily, templates will be autoescaped by default
+    template = """{% spurl base="http://www.google.com" query="a=b" add_query="c=d" add_query="e=f" fragment="frag" %}"""  # noqa: E501
+    rendered = render(
+        template,
+        autoescape=True,
+    )  # Ordinarily, templates will be autoescaped by default
     assert rendered == "http://www.google.com?a=b&amp;c=d&amp;e=f#frag"
 
 
 def test_disable_autoescaping_with_parameter():
-    template = """{% spurl base="http://www.google.com" query="a=b" add_query="c=d" autoescape="False" %}"""
+    template = """{% spurl base="http://www.google.com" query="a=b" add_query="c=d" autoescape="False" %}"""  # noqa: E501
     rendered = render(template, autoescape=True)
     assert rendered == "http://www.google.com?a=b&c=d"
 
@@ -481,28 +475,29 @@ def test_url_as_template_variable():
 
 
 def test_reversing_inside_spurl_tag():
-    template = r"""{% spurl base="http://www.google.com/" path="{\% url 'test' %\}" %}"""
-    if django.VERSION < (1, 9):
-        template = r"""{% load url from future %}{% spurl base="http://www.google.com/" path="{\% url 'test' %\}" %}"""
-    else:
-        template = r"""{% spurl base="http://www.google.com/" path="{\% url 'test' %\}" %}"""
+    template = (
+        r"""{% spurl base="http://www.google.com/" path="{\% url 'test' %\}" %}"""
+    )
+    template = (
+        r"""{% spurl base="http://www.google.com/" path="{\% url 'test' %\}" %}"""
+    )
     rendered = render(template)
     assert rendered == "http://www.google.com/test/"
 
-    if django.VERSION < (1, 9):
-        template = (
-            r"""{% load url from future %}{% spurl base="http://www.google.com/" query="next={\% url 'test' %\}" %}"""
-        )
-    else:
-        template = r"""{% spurl base="http://www.google.com/" query="next={\% url 'test' %\}" %}"""
+    template = (
+        r"""{% spurl base="http://www.google.com/" query="next={\% url 'test' %\}" %}"""
+    )
     rendered = render(template)
     assert rendered == "http://www.google.com/?next=/test/"
 
 
 def test_xzibit():
-    template = r"""Yo dawg, the URL is: {% spurl base="http://www.google.com/" query="foo={\% spurl base='http://another.com' secure='true' %\}" %}"""
+    template = r"""Yo dawg, the URL is: {% spurl base="http://www.google.com/" query="foo={\% spurl base='http://another.com' secure='true' %\}" %}"""  # noqa: E501
     rendered = render(template)
-    assert rendered == "Yo dawg, the URL is: http://www.google.com/?foo=https://another.com"
+    assert (
+        rendered
+        == "Yo dawg, the URL is: http://www.google.com/?foo=https://another.com"
+    )
 
 
 def test_auth_with_username_and_password():

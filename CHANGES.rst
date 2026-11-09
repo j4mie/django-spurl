@@ -1,6 +1,16 @@
 Changes
 -------
 
+0.6.9 (unreleased)
+~~~~~~~~~~~~~~~~~~
+
+* Drop support for Python < 3.11 and Django < 5.2.
+* Add support for Python 3.11 – 3.15 and Django 5.2, 6.0 and 6.1.
+* Remove deprecated code and the unused ``six`` dependency.
+* Migrate packaging from ``setup.py`` / ``setup.cfg`` to ``pyproject.toml``.
+* Switch test suite from ``nose`` to ``pytest``.
+* Replace Travis CI with GitHub Actions.
+
 0.6.8 (2021-11-15)
 ~~~~~~~~~~~~~~~~~~
 
