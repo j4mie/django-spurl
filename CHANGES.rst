@@ -1,7 +1,7 @@
 Changes
 -------
 
-0.6.9 (unreleased)
+0.6.9 (2026-11-09)
 ~~~~~~~~~~~~~~~~~~
 
 * Drop support for Python < 3.11 and Django < 5.2.
