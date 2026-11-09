@@ -25,6 +25,7 @@ Changes
 ~~~~~~~~~~~~~~~~~~
 
 * Added support for an except clause to remove all but specifed query vars.
+* Added support for removing a single value with ``remove_query_param="key=value"`` (#7, thanks Ed Stafford).
 
 0.6.5 (2018-05-09)
 ~~~~~~~~~~~~~~~~~~

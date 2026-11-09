@@ -517,7 +517,7 @@ markers with backslashes:
 
 .. code:: html+django
 
-    {% spurl base="http://example.com" add_query="next={\% url home %\}" %}
+    {% spurl base="http://example.com" add_query="next={\% url 'home' %\}" %}
 
 Note that any tags or filters loaded in your template are automatically
 available in the nested templates used to render each variable. This
@@ -525,7 +525,6 @@ means we can do:
 
 .. code:: html+django
 
-    {% load url from future %}
     {% spurl base="{\% url 'home' %\}" %}
 
 Be careful with your quotation marks! If you use double-quotes to
