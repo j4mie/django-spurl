@@ -182,6 +182,14 @@ Set the scheme component of the URL. Example:
 
 This will return ``ftp://example.com``
 
+.. note::
+
+    ``scheme`` (and ``secure``, below) only makes sense for URLs that have
+    a host. If the URL has no host, for example ``base="/foo/bar"``, you
+    will get ``https:///foo/bar``, which browsers don't treat as a link to
+    your site. Supply the host as well, for example
+    ``{% spurl base="/foo/bar" scheme="https" host=request.get_host %}``.
+
 See also: ``scheme_from``, below.
 
 host
@@ -433,6 +441,8 @@ be converted to ``False``. Example:
     {% spurl base="http://example.com/" secure="True" %}
 
 This will return ``https://example.com/``
+
+As with ``scheme``, the URL must have a host for this to be useful.
 
 autoescape
 ^^^^^^^^^^

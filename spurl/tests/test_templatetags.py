@@ -343,6 +343,12 @@ def test_override_scheme():
     assert rendered == "ftp://google.com"
 
 
+def test_scheme_without_host():
+    template = """{% spurl base="/foo/bar" scheme="https" %}"""
+    rendered = render(template)
+    assert rendered == "https:///foo/bar"
+
+
 def test_scheme_from():
     template = (
         """{% spurl base="http://www.google.com/?bla=bla&foo=bar" scheme_from=url %}"""
